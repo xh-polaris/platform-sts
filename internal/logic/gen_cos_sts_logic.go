@@ -51,7 +51,7 @@ func (l *GenCosStsLogic) GenCosSts(in *pb.GenCosStsReq) (*pb.GenCosStsResp, erro
 					Effect: "allow",
 					// 密钥可控制的资源列表。此处开放名字为用户ID的文件夹及其子文件夹
 					Resource: []string{
-						fmt.Sprintf("qcs::cos:%s:uid/%s:%s/%s/%s",
+						fmt.Sprintf("qcs::cos:%s:uid/%s:%s/users/%s/%s",
 							cosConfig.Region, cosConfig.AppId, cosConfig.BucketName, in.UserId, in.Path),
 					},
 				},
