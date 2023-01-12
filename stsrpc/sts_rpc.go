@@ -13,11 +13,14 @@ import (
 )
 
 type (
-	GetUserCosStsReq  = pb.GetUserCosStsReq
-	GetUserCosStsResp = pb.GetUserCosStsResp
+	GenCosStsReq     = pb.GenCosStsReq
+	GenCosStsResp    = pb.GenCosStsResp
+	GenSignedUrlReq  = pb.GenSignedUrlReq
+	GenSignedUrlResp = pb.GenSignedUrlResp
 
 	StsRpc interface {
-		GetUserCosSts(ctx context.Context, in *GetUserCosStsReq, opts ...grpc.CallOption) (*GetUserCosStsResp, error)
+		GenCosSts(ctx context.Context, in *GenCosStsReq, opts ...grpc.CallOption) (*GenCosStsResp, error)
+		GenSignedUrl(ctx context.Context, in *GenSignedUrlReq, opts ...grpc.CallOption) (*GenSignedUrlResp, error)
 	}
 
 	defaultStsRpc struct {
@@ -31,7 +34,12 @@ func NewStsRpc(cli zrpc.Client) StsRpc {
 	}
 }
 
-func (m *defaultStsRpc) GetUserCosSts(ctx context.Context, in *GetUserCosStsReq, opts ...grpc.CallOption) (*GetUserCosStsResp, error) {
+func (m *defaultStsRpc) GenCosSts(ctx context.Context, in *GenCosStsReq, opts ...grpc.CallOption) (*GenCosStsResp, error) {
 	client := pb.NewStsRpcClient(m.cli.Conn())
-	return client.GetUserCosSts(ctx, in, opts...)
+	return client.GenCosSts(ctx, in, opts...)
+}
+
+func (m *defaultStsRpc) GenSignedUrl(ctx context.Context, in *GenSignedUrlReq, opts ...grpc.CallOption) (*GenSignedUrlResp, error) {
+	client := pb.NewStsRpcClient(m.cli.Conn())
+	return client.GenSignedUrl(ctx, in, opts...)
 }

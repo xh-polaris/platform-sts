@@ -22,7 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type StsRpcClient interface {
-	GetUserCosSts(ctx context.Context, in *GetUserCosStsReq, opts ...grpc.CallOption) (*GetUserCosStsResp, error)
+	GenCosSts(ctx context.Context, in *GenCosStsReq, opts ...grpc.CallOption) (*GenCosStsResp, error)
+	GenSignedUrl(ctx context.Context, in *GenSignedUrlReq, opts ...grpc.CallOption) (*GenSignedUrlResp, error)
 }
 
 type stsRpcClient struct {
@@ -33,9 +34,18 @@ func NewStsRpcClient(cc grpc.ClientConnInterface) StsRpcClient {
 	return &stsRpcClient{cc}
 }
 
-func (c *stsRpcClient) GetUserCosSts(ctx context.Context, in *GetUserCosStsReq, opts ...grpc.CallOption) (*GetUserCosStsResp, error) {
-	out := new(GetUserCosStsResp)
-	err := c.cc.Invoke(ctx, "/sts.sts_rpc/getUserCosSts", in, out, opts...)
+func (c *stsRpcClient) GenCosSts(ctx context.Context, in *GenCosStsReq, opts ...grpc.CallOption) (*GenCosStsResp, error) {
+	out := new(GenCosStsResp)
+	err := c.cc.Invoke(ctx, "/sts.sts_rpc/genCosSts", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *stsRpcClient) GenSignedUrl(ctx context.Context, in *GenSignedUrlReq, opts ...grpc.CallOption) (*GenSignedUrlResp, error) {
+	out := new(GenSignedUrlResp)
+	err := c.cc.Invoke(ctx, "/sts.sts_rpc/genSignedUrl", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +56,8 @@ func (c *stsRpcClient) GetUserCosSts(ctx context.Context, in *GetUserCosStsReq, 
 // All implementations must embed UnimplementedStsRpcServer
 // for forward compatibility
 type StsRpcServer interface {
-	GetUserCosSts(context.Context, *GetUserCosStsReq) (*GetUserCosStsResp, error)
+	GenCosSts(context.Context, *GenCosStsReq) (*GenCosStsResp, error)
+	GenSignedUrl(context.Context, *GenSignedUrlReq) (*GenSignedUrlResp, error)
 	mustEmbedUnimplementedStsRpcServer()
 }
 
@@ -54,8 +65,11 @@ type StsRpcServer interface {
 type UnimplementedStsRpcServer struct {
 }
 
-func (UnimplementedStsRpcServer) GetUserCosSts(context.Context, *GetUserCosStsReq) (*GetUserCosStsResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUserCosSts not implemented")
+func (UnimplementedStsRpcServer) GenCosSts(context.Context, *GenCosStsReq) (*GenCosStsResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GenCosSts not implemented")
+}
+func (UnimplementedStsRpcServer) GenSignedUrl(context.Context, *GenSignedUrlReq) (*GenSignedUrlResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GenSignedUrl not implemented")
 }
 func (UnimplementedStsRpcServer) mustEmbedUnimplementedStsRpcServer() {}
 
@@ -70,20 +84,38 @@ func RegisterStsRpcServer(s grpc.ServiceRegistrar, srv StsRpcServer) {
 	s.RegisterService(&StsRpc_ServiceDesc, srv)
 }
 
-func _StsRpc_GetUserCosSts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUserCosStsReq)
+func _StsRpc_GenCosSts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GenCosStsReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(StsRpcServer).GetUserCosSts(ctx, in)
+		return srv.(StsRpcServer).GenCosSts(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sts.sts_rpc/getUserCosSts",
+		FullMethod: "/sts.sts_rpc/genCosSts",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(StsRpcServer).GetUserCosSts(ctx, req.(*GetUserCosStsReq))
+		return srv.(StsRpcServer).GenCosSts(ctx, req.(*GenCosStsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StsRpc_GenSignedUrl_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GenSignedUrlReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StsRpcServer).GenSignedUrl(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sts.sts_rpc/genSignedUrl",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StsRpcServer).GenSignedUrl(ctx, req.(*GenSignedUrlReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -96,8 +128,12 @@ var StsRpc_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*StsRpcServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "getUserCosSts",
-			Handler:    _StsRpc_GetUserCosSts_Handler,
+			MethodName: "genCosSts",
+			Handler:    _StsRpc_GenCosSts_Handler,
+		},
+		{
+			MethodName: "genSignedUrl",
+			Handler:    _StsRpc_GenSignedUrl_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

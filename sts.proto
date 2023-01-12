@@ -4,12 +4,12 @@ package sts;
 
 option go_package='./pb';
 
-message GetUserCosStsReq {
+message GenCosStsReq {
   string userId = 1;
   string path = 2;
 }
 
-message GetUserCosStsResp {
+message GenCosStsResp {
   string secretId = 1;
   string secretKey = 2;
   string sessionToken = 3;
@@ -17,6 +17,18 @@ message GetUserCosStsResp {
   int64 startTime = 5;
 }
 
+message GenSignedUrlReq {
+  string secretId = 1;
+  string secretKey = 2;
+  string method = 3;
+  string path = 4;
+}
+
+message GenSignedUrlResp {
+  string signedUrl = 1;
+}
+
 service sts_rpc {
-  rpc getUserCosSts(GetUserCosStsReq) returns (GetUserCosStsResp);
+  rpc genCosSts(GenCosStsReq) returns (GenCosStsResp);
+  rpc genSignedUrl(GenSignedUrlReq) returns (GenSignedUrlResp);
 }

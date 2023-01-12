@@ -22,7 +22,12 @@ func NewStsRpcServer(svcCtx *svc.ServiceContext) *StsRpcServer {
 	}
 }
 
-func (s *StsRpcServer) GetUserCosSts(ctx context.Context, in *pb.GetUserCosStsReq) (*pb.GetUserCosStsResp, error) {
-	l := logic.NewGetUserCosStsLogic(ctx, s.svcCtx)
-	return l.GetUserCosSts(in)
+func (s *StsRpcServer) GenCosSts(ctx context.Context, in *pb.GenCosStsReq) (*pb.GenCosStsResp, error) {
+	l := logic.NewGenCosStsLogic(ctx, s.svcCtx)
+	return l.GenCosSts(in)
+}
+
+func (s *StsRpcServer) GenSignedUrl(ctx context.Context, in *pb.GenSignedUrlReq) (*pb.GenSignedUrlResp, error) {
+	l := logic.NewGenSignedUrlLogic(ctx, s.svcCtx)
+	return l.GenSignedUrl(in)
 }
