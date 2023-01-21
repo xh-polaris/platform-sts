@@ -5,8 +5,7 @@ package sts;
 option go_package='./pb';
 
 message GenCosStsReq {
-  string userId = 1;
-  string path = 2;
+  string path = 1;
 }
 
 message GenCosStsResp {
