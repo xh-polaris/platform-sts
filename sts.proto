@@ -27,7 +27,16 @@ message GenSignedUrlResp {
   string signedUrl = 1;
 }
 
+message DeleteObjectReq {
+  string path = 1;
+}
+
+message DeleteObjectResp {
+
+}
+
 service sts_rpc {
   rpc genCosSts(GenCosStsReq) returns (GenCosStsResp);
   rpc genSignedUrl(GenSignedUrlReq) returns (GenSignedUrlResp);
+  rpc deleteObject(DeleteObjectReq) returns (DeleteObjectResp);
 }

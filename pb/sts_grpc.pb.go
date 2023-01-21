@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type StsRpcClient interface {
 	GenCosSts(ctx context.Context, in *GenCosStsReq, opts ...grpc.CallOption) (*GenCosStsResp, error)
 	GenSignedUrl(ctx context.Context, in *GenSignedUrlReq, opts ...grpc.CallOption) (*GenSignedUrlResp, error)
+	DeleteObject(ctx context.Context, in *DeleteObjectReq, opts ...grpc.CallOption) (*DeleteObjectResp, error)
 }
 
 type stsRpcClient struct {
@@ -52,12 +53,22 @@ func (c *stsRpcClient) GenSignedUrl(ctx context.Context, in *GenSignedUrlReq, op
 	return out, nil
 }
 
+func (c *stsRpcClient) DeleteObject(ctx context.Context, in *DeleteObjectReq, opts ...grpc.CallOption) (*DeleteObjectResp, error) {
+	out := new(DeleteObjectResp)
+	err := c.cc.Invoke(ctx, "/sts.sts_rpc/deleteObject", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // StsRpcServer is the server API for StsRpc service.
 // All implementations must embed UnimplementedStsRpcServer
 // for forward compatibility
 type StsRpcServer interface {
 	GenCosSts(context.Context, *GenCosStsReq) (*GenCosStsResp, error)
 	GenSignedUrl(context.Context, *GenSignedUrlReq) (*GenSignedUrlResp, error)
+	DeleteObject(context.Context, *DeleteObjectReq) (*DeleteObjectResp, error)
 	mustEmbedUnimplementedStsRpcServer()
 }
 
@@ -70,6 +81,9 @@ func (UnimplementedStsRpcServer) GenCosSts(context.Context, *GenCosStsReq) (*Gen
 }
 func (UnimplementedStsRpcServer) GenSignedUrl(context.Context, *GenSignedUrlReq) (*GenSignedUrlResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GenSignedUrl not implemented")
+}
+func (UnimplementedStsRpcServer) DeleteObject(context.Context, *DeleteObjectReq) (*DeleteObjectResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteObject not implemented")
 }
 func (UnimplementedStsRpcServer) mustEmbedUnimplementedStsRpcServer() {}
 
@@ -120,6 +134,24 @@ func _StsRpc_GenSignedUrl_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _StsRpc_DeleteObject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteObjectReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StsRpcServer).DeleteObject(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sts.sts_rpc/deleteObject",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StsRpcServer).DeleteObject(ctx, req.(*DeleteObjectReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // StsRpc_ServiceDesc is the grpc.ServiceDesc for StsRpc service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -134,6 +166,10 @@ var StsRpc_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "genSignedUrl",
 			Handler:    _StsRpc_GenSignedUrl_Handler,
+		},
+		{
+			MethodName: "deleteObject",
+			Handler:    _StsRpc_DeleteObject_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

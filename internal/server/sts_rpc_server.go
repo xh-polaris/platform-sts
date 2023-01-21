@@ -31,3 +31,8 @@ func (s *StsRpcServer) GenSignedUrl(ctx context.Context, in *pb.GenSignedUrlReq)
 	l := logic.NewGenSignedUrlLogic(ctx, s.svcCtx)
 	return l.GenSignedUrl(in)
 }
+
+func (s *StsRpcServer) DeleteObject(ctx context.Context, in *pb.DeleteObjectReq) (*pb.DeleteObjectResp, error) {
+	l := logic.NewDeleteObjectLogic(ctx, s.svcCtx)
+	return l.DeleteObject(in)
+}
