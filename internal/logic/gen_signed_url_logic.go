@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"github.com/xh-polaris/sts-rpc/model"
 	"time"
 
 	"github.com/xh-polaris/sts-rpc/internal/svc"
@@ -26,6 +27,12 @@ func NewGenSignedUrlLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GenS
 
 func (l *GenSignedUrlLogic) GenSignedUrl(in *pb.GenSignedUrlReq) (*pb.GenSignedUrlResp, error) {
 	url, err := l.svcCtx.CosClient.Object.GetPresignedURL(l.ctx, in.Method, in.Path, in.SecretId, in.SecretKey, time.Minute, nil)
+	if err != nil {
+		return nil, err
+	}
+	err = l.svcCtx.UrlModel.Insert(l.ctx, &model.Url{
+		Url: url.Scheme + "://" + url.Host + url.RawPath,
+	})
 	if err != nil {
 		return nil, err
 	}
