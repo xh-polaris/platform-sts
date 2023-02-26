@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/tencentyun/cos-go-sdk-v5 v0.7.41
 	github.com/tencentyun/qcloud-cos-sts-sdk v0.0.0-20221108110633-dbdf102a1cdf
-	github.com/zeromicro/go-zero v1.4.3
+	github.com/zeromicro/go-zero v1.4.4
 	go.mongodb.org/mongo-driver v1.11.1
 	google.golang.org/grpc v1.51.0
 	google.golang.org/protobuf v1.28.1
@@ -65,6 +65,7 @@ require (
 	go.opentelemetry.io/otel/exporters/otlp/internal/retry v1.11.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.11.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.11.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.10.0 // indirect
 	go.opentelemetry.io/otel/exporters/zipkin v1.11.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.11.0 // indirect
 	go.opentelemetry.io/otel/trace v1.11.0 // indirect
