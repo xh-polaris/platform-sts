@@ -17,7 +17,6 @@ var (
 const (
 	delay      = time.Hour
 	delayQueue = "sts:dq:timeOutObjectUrl"
-	usedUrl    = "sts:store:usedUrl"
 )
 
 // checkSingletonRedis singleton redis pattern
@@ -57,19 +56,12 @@ func DeleteTimeoutObjectLogic(svc *svc.ServiceContext) {
 			continue
 		}
 		// 查看是否存在于已经使用的url中
-		exist, _ := cli.Sismember(usedUrl, first.Key)
-		if exist {
-			// 因为redis可以保证原子性，我们在获取到了时间戳的同时
-			// 获得了时间戳的独立所有权，所以这里一定能删除成功
-			_, _ = cli.Srem(usedUrl, first.Key)
-		} else {
-			l := NewDeleteObjectLogic(ctx, svc)
-			fakeReq := pb.DeleteObjectReq{
-				Path: first.Key,
-			}
-			// 删除不成功的话只能不再删除, 所以这里没有处理异常
-			_, _ = l.DeleteObject(&fakeReq)
+		l := NewDeleteObjectLogic(ctx, svc)
+		fakeReq := pb.DeleteObjectReq{
+			Path: first.Key,
 		}
+		// 删除不成功的话只能不再删除, 所以这里没有处理异常
+		_, _ = l.DeleteObject(&fakeReq)
 	}
 }
 
