@@ -26,7 +26,7 @@ func NewDeleteObjectLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Dele
 
 func (l *DeleteObjectLogic) DeleteObject(in *pb.DeleteObjectReq) (*pb.DeleteObjectResp, error) {
 	res, err := l.svcCtx.CosClient.Object.Delete(l.ctx, in.Path)
-	if res.StatusCode != 200 || err != nil {
+	if err != nil || res.StatusCode != 200 {
 		return nil, errorx.ErrCannotDeleteObject
 	}
 	return &pb.DeleteObjectResp{}, nil

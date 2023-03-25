@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/xh-polaris/sts-rpc/internal/config"
+	"github.com/xh-polaris/sts-rpc/internal/logic"
 	"github.com/xh-polaris/sts-rpc/internal/server"
 	"github.com/xh-polaris/sts-rpc/internal/svc"
 	"github.com/xh-polaris/sts-rpc/pb"
@@ -31,6 +32,9 @@ func main() {
 		if c.Mode == service.DevMode || c.Mode == service.TestMode {
 			reflection.Register(grpcServer)
 		}
+		// start background timeout object service
+		go logic.DeleteTimeoutObjectLogic(ctx)
+		go logic.DeleteTimeoutObjectLogic(ctx)
 	})
 	defer s.Stop()
 
