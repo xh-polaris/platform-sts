@@ -36,5 +36,9 @@ func (l *GenSignedUrlLogic) GenSignedUrl(in *pb.GenSignedUrlReq) (*pb.GenSignedU
 	if err != nil {
 		return nil, err
 	}
+	err = addToDelayQueue(l.svcCtx, in.Path)
+	if err != nil {
+		return nil, err
+	}
 	return &pb.GenSignedUrlResp{SignedUrl: url.String()}, nil
 }
