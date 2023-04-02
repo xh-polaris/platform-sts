@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/apache/rocketmq-client-go/v2/rlog"
 
 	"github.com/xh-polaris/sts-rpc/internal/config"
-	"github.com/xh-polaris/sts-rpc/internal/logic"
 	"github.com/xh-polaris/sts-rpc/internal/server"
 	"github.com/xh-polaris/sts-rpc/internal/svc"
 	"github.com/xh-polaris/sts-rpc/pb"
@@ -21,7 +21,7 @@ var configFile = flag.String("f", "etc/sts.yaml", "the config file")
 
 func main() {
 	flag.Parse()
-
+	rlog.SetLogLevel("ERROR")
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
 	ctx := svc.NewServiceContext(c)
@@ -33,8 +33,6 @@ func main() {
 			reflection.Register(grpcServer)
 		}
 		// start background timeout object service
-		go logic.DeleteTimeoutObjectLogic(ctx)
-		go logic.DeleteTimeoutObjectLogic(ctx)
 	})
 	defer s.Stop()
 

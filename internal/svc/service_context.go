@@ -1,6 +1,8 @@
 package svc
 
 import (
+	"github.com/apache/rocketmq-client-go/v2"
+	"github.com/xh-polaris/sts-rpc/internal/schedule"
 	"log"
 	"net/http"
 
@@ -15,6 +17,7 @@ type ServiceContext struct {
 	Config    config.Config
 	StsClient *sts.Client
 	CosClient *cos.Client
+	mq        *rocketmq.PushConsumer
 	UrlModel  model.UrlModel
 }
 
@@ -32,6 +35,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 			c.CosConfig.SecretId,
 			c.CosConfig.SecretKey,
 			nil),
+		mq:        schedule.CreateMQConsumer(&c),
 		CosClient: cos.NewClient(b, &http.Client{}),
 		UrlModel:  model.NewUrlModel(c.Mongo.URL, c.Mongo.DB, c.CacheConf),
 	}
