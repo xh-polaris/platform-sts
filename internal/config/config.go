@@ -19,4 +19,9 @@ type Config struct {
 		URL string
 	}
 	CacheConf cache.CacheConf
+	RocketMq  struct {
+		URL       []string
+		Retry     int
+		GroupName string
+	}
 }
