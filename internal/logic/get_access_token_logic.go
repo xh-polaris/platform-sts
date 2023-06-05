@@ -37,17 +37,14 @@ func (l *GetAccessTokenLogic) GetAccessToken(in *pb.GetAccessTokenReq) (resp *pb
 	if in.App == "old" {
 		appId = l.svcCtx.MeowchatOld.GetContext().AppID
 		appSecret = l.svcCtx.MeowchatOld.GetContext().AppSecret
-		println("old")
 	}
 	if in.App == "meowchat" {
 		appId = l.svcCtx.Meowchat.GetContext().AppID
 		appSecret = l.svcCtx.Meowchat.GetContext().AppSecret
-		println("meowchat")
 	}
 	if in.App == "manager" {
 		appId = l.svcCtx.Config.MeowchatManager.AppID
 		appSecret = l.svcCtx.Config.MeowchatManager.AppSecret
-		println("manager")
 	}
 
 	println(appId)
@@ -61,7 +58,6 @@ func (l *GetAccessTokenLogic) GetAccessToken(in *pb.GetAccessTokenReq) (resp *pb
 	}
 	resp = &pb.GetAccessTokenResp{}
 	resp.AccessToken = j["access_token"].(string)
-	fmt.Printf(resp.AccessToken)
 	resp.ExpiresIn = int64(j["expires_in"].(float64))
 	return
 }
