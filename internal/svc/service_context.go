@@ -1,8 +1,10 @@
 package svc
 
 import (
+	"github.com/apache/rocketmq-client-go/v2"
 	"github.com/silenceper/wechat/v2"
 	"github.com/silenceper/wechat/v2/cache"
+	"github.com/xh-polaris/sts-rpc/internal/schedule"
 	"log"
 	"net/http"
 
@@ -26,6 +28,7 @@ type ServiceContext struct {
 	UrlModel    model.UrlModel
 	Meowchat    *miniprogram.MiniProgram
 	MeowchatOld *miniprogram.MiniProgram
+	mq          *rocketmq.PushConsumer
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -54,5 +57,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 			AppSecret: c.MeowchatOld.AppSecret,
 			Cache:     cache.NewMemory(),
 		}),
+		mq: schedule.CreateMQConsumer(&c),
 	}
 }

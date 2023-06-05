@@ -31,4 +31,9 @@ type Config struct {
 		AppID     string
 		AppSecret string
 	}
+	RocketMq struct {
+		URL       []string
+		Retry     int
+		GroupName string
+	}
 }
