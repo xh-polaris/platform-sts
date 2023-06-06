@@ -13,17 +13,20 @@ import (
 )
 
 type (
-	DeleteObjectReq  = pb.DeleteObjectReq
-	DeleteObjectResp = pb.DeleteObjectResp
-	GenCosStsReq     = pb.GenCosStsReq
-	GenCosStsResp    = pb.GenCosStsResp
-	GenSignedUrlReq  = pb.GenSignedUrlReq
-	GenSignedUrlResp = pb.GenSignedUrlResp
+	DeleteObjectReq    = pb.DeleteObjectReq
+	DeleteObjectResp   = pb.DeleteObjectResp
+	GenCosStsReq       = pb.GenCosStsReq
+	GenCosStsResp      = pb.GenCosStsResp
+	GenSignedUrlReq    = pb.GenSignedUrlReq
+	GenSignedUrlResp   = pb.GenSignedUrlResp
+	GetAccessTokenReq  = pb.GetAccessTokenReq
+	GetAccessTokenResp = pb.GetAccessTokenResp
 
 	StsRpc interface {
 		GenCosSts(ctx context.Context, in *GenCosStsReq, opts ...grpc.CallOption) (*GenCosStsResp, error)
 		GenSignedUrl(ctx context.Context, in *GenSignedUrlReq, opts ...grpc.CallOption) (*GenSignedUrlResp, error)
 		DeleteObject(ctx context.Context, in *DeleteObjectReq, opts ...grpc.CallOption) (*DeleteObjectResp, error)
+		GetAccessToken(ctx context.Context, in *GetAccessTokenReq, opts ...grpc.CallOption) (*GetAccessTokenResp, error)
 	}
 
 	defaultStsRpc struct {
@@ -50,4 +53,9 @@ func (m *defaultStsRpc) GenSignedUrl(ctx context.Context, in *GenSignedUrlReq, o
 func (m *defaultStsRpc) DeleteObject(ctx context.Context, in *DeleteObjectReq, opts ...grpc.CallOption) (*DeleteObjectResp, error) {
 	client := pb.NewStsRpcClient(m.cli.Conn())
 	return client.DeleteObject(ctx, in, opts...)
+}
+
+func (m *defaultStsRpc) GetAccessToken(ctx context.Context, in *GetAccessTokenReq, opts ...grpc.CallOption) (*GetAccessTokenResp, error) {
+	client := pb.NewStsRpcClient(m.cli.Conn())
+	return client.GetAccessToken(ctx, in, opts...)
 }

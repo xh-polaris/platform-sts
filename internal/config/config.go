@@ -19,7 +19,19 @@ type Config struct {
 		URL string
 	}
 	CacheConf cache.CacheConf
-	RocketMq  struct {
+	Meowchat  struct {
+		AppID     string
+		AppSecret string
+	}
+	MeowchatOld struct {
+		AppID     string
+		AppSecret string
+	}
+	MeowchatManager struct {
+		AppID     string
+		AppSecret string
+	}
+	RocketMq struct {
 		URL       []string
 		Retry     int
 		GroupName string

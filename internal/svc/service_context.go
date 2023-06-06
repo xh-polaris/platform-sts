@@ -2,10 +2,14 @@ package svc
 
 import (
 	"github.com/apache/rocketmq-client-go/v2"
+	"github.com/silenceper/wechat/v2"
+	"github.com/silenceper/wechat/v2/cache"
 	"github.com/xh-polaris/sts-rpc/internal/schedule"
 	"log"
 	"net/http"
 
+	"github.com/silenceper/wechat/v2/miniprogram"
+	mpConfig "github.com/silenceper/wechat/v2/miniprogram/config"
 	"github.com/xh-polaris/sts-rpc/internal/config"
 	"github.com/xh-polaris/sts-rpc/model"
 
@@ -13,12 +17,18 @@ import (
 	"github.com/tencentyun/qcloud-cos-sts-sdk/go"
 )
 
+type A interface {
+	miniprogram.MiniProgram
+}
+
 type ServiceContext struct {
-	Config    config.Config
-	StsClient *sts.Client
-	CosClient *cos.Client
-	mq        *rocketmq.PushConsumer
-	UrlModel  model.UrlModel
+	Config      config.Config
+	StsClient   *sts.Client
+	CosClient   *cos.Client
+	UrlModel    model.UrlModel
+	Meowchat    *miniprogram.MiniProgram
+	MeowchatOld *miniprogram.MiniProgram
+	mq          *rocketmq.PushConsumer
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -35,8 +45,18 @@ func NewServiceContext(c config.Config) *ServiceContext {
 			c.CosConfig.SecretId,
 			c.CosConfig.SecretKey,
 			nil),
-		mq:        schedule.CreateMQConsumer(&c),
 		CosClient: cos.NewClient(b, &http.Client{}),
 		UrlModel:  model.NewUrlModel(c.Mongo.URL, c.Mongo.DB, c.CacheConf),
+		Meowchat: wechat.NewWechat().GetMiniProgram(&mpConfig.Config{
+			AppID:     c.Meowchat.AppID,
+			AppSecret: c.Meowchat.AppSecret,
+			Cache:     cache.NewMemory(),
+		}),
+		MeowchatOld: wechat.NewWechat().GetMiniProgram(&mpConfig.Config{
+			AppID:     c.MeowchatOld.AppID,
+			AppSecret: c.MeowchatOld.AppSecret,
+			Cache:     cache.NewMemory(),
+		}),
+		mq: schedule.CreateMQConsumer(&c),
 	}
 }

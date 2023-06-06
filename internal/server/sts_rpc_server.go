@@ -36,3 +36,8 @@ func (s *StsRpcServer) DeleteObject(ctx context.Context, in *pb.DeleteObjectReq)
 	l := logic.NewDeleteObjectLogic(ctx, s.svcCtx)
 	return l.DeleteObject(in)
 }
+
+func (s *StsRpcServer) GetAccessToken(ctx context.Context, in *pb.GetAccessTokenReq) (*pb.GetAccessTokenResp, error) {
+	l := logic.NewGetAccessTokenLogic(ctx, s.svcCtx)
+	return l.GetAccessToken(in)
+}

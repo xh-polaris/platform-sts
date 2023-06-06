@@ -35,8 +35,21 @@ message DeleteObjectResp {
 
 }
 
+//app值为meowchat,old,manager
+message GetAccessTokenReq {
+  string app = 1;
+}
+
+message GetAccessTokenResp {
+  string accessToken = 1 ;
+  int64 expiresIn = 2;
+}
+
+
 service sts_rpc {
   rpc genCosSts(GenCosStsReq) returns (GenCosStsResp);
   rpc genSignedUrl(GenSignedUrlReq) returns (GenSignedUrlResp);
   rpc deleteObject(DeleteObjectReq) returns (DeleteObjectResp);
+  rpc GetAccessToken(GetAccessTokenReq) returns (GetAccessTokenResp);
 }
+
