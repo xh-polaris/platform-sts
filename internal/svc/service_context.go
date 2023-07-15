@@ -4,7 +4,6 @@ import (
 	"github.com/apache/rocketmq-client-go/v2"
 	"github.com/silenceper/wechat/v2"
 	"github.com/silenceper/wechat/v2/cache"
-	"github.com/xh-polaris/sts-rpc/internal/schedule"
 	"log"
 	"net/http"
 
@@ -57,6 +56,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 			AppSecret: c.MeowchatOld.AppSecret,
 			Cache:     cache.NewMemory(),
 		}),
-		mq: schedule.CreateMQConsumer(&c),
+		mq: nil,
 	}
 }

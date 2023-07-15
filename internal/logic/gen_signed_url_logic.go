@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"github.com/xh-polaris/sts-rpc/internal/schedule"
 	"github.com/xh-polaris/sts-rpc/model"
 	"time"
 
@@ -37,6 +36,6 @@ func (l *GenSignedUrlLogic) GenSignedUrl(in *pb.GenSignedUrlReq) (*pb.GenSignedU
 	if err != nil {
 		return nil, err
 	}
-	go schedule.SendDelayMessage(&l.svcCtx.Config, url)
+	// go schedule.SendDelayMessage(&l.svcCtx.Config, url)
 	return &pb.GenSignedUrlResp{SignedUrl: url.String()}, nil
 }
