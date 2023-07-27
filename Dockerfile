@@ -14,16 +14,15 @@ ADD go.mod .
 ADD go.sum .
 RUN go mod download
 COPY . .
-RUN go build -ldflags="-s -w" -o /app/sts-rpc .
+RUN sh ./build.sh
 
+FROM alpine
 
-FROM scratch
-
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=builder /usr/share/zoneinfo/Asia/Shanghai /usr/share/zoneinfo/Asia/Shanghai
+
 ENV TZ Asia/Shanghai
 
 WORKDIR /app
-COPY --from=builder /app/sts-rpc /app/sts-rpc
+COPY --from=builder /build/output /app
 
-CMD ["./sts-rpc", "-f", "etc/sts.yaml"]
+CMD ["sh", "./bootstrap.sh"]
