@@ -31,7 +31,12 @@ func NewCosClient(config *config.Config) (*cos.Client, error) {
 	return cos.NewClient(&cos.BaseURL{
 		BucketURL: bucketURL,
 		CIURL:     ciURL,
-	}, &http.Client{}), nil
+	}, &http.Client{
+		Transport: &cos.AuthorizationTransport{
+			SecretID:  config.CosConfig.SecretId,
+			SecretKey: config.CosConfig.SecretKey,
+		},
+	}), nil
 }
 
 var CosSet = wire.NewSet(
