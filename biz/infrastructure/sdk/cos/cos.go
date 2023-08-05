@@ -19,11 +19,12 @@ func NewStsClient(config *config.Config) *sts.Client {
 }
 
 func NewCosClient(config *config.Config) (*cos.Client, error) {
-	bucketURL, err := cos.NewBucketURL(config.CosConfig.BucketName, config.CosConfig.Region, true)
+	//bucketURL, err := cos.NewBucketURL(config.CosConfig.BucketName, config.CosConfig.Region, true)
+	bucketURL, err := url.Parse(config.CosConfig.CosHost())
 	if err != nil {
 		return nil, err
 	}
-	ciURL, err := url.Parse("https://" + config.CosConfig.CIHost())
+	ciURL, err := url.Parse(config.CosConfig.CIHost())
 	if err != nil {
 		return nil, err
 	}
