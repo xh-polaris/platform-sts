@@ -18,7 +18,7 @@ type RedisPlus struct {
 
 func (r RedisPlus) Get(key string) interface{} {
 	data, err := r.Redis.GetCtx(context.Background(), key)
-	if err != nil {
+	if err != nil || data == "" {
 		return nil
 	}
 	return data
