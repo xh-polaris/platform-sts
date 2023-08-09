@@ -26,7 +26,7 @@ func (r RedisPlus) Get(key string) interface{} {
 
 func (r RedisPlus) Set(key string, val interface{}, timeout time.Duration) error {
 	str := fmt.Sprintf("%v", val)
-	err := r.Redis.SetexCtx(context.Background(), key, str, int(timeout))
+	err := r.Redis.SetexCtx(context.Background(), key, str, int(timeout.Seconds()))
 	return err
 }
 
