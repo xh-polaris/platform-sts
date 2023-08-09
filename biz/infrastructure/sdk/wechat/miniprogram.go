@@ -56,7 +56,7 @@ func NewWechatApplicationMap(config *config.Config) MiniProgramMap {
 			m[conf.AppID] = wx.GetMiniProgram(&mpConfig.Config{
 				AppID:     conf.AppID,
 				AppSecret: conf.AppSecret,
-				Cache:     NewRedisPlus(*config.Redis),
+				Cache:     NewRedisPlus(*config.WeChatRedis),
 			})
 		}
 

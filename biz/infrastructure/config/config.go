@@ -33,6 +33,7 @@ type Config struct {
 	CacheConf                cache.CacheConf
 	WechatApplicationConfigs []*WechatApplicationConfig
 	Redis                    *redis.RedisConf
+	WeChatRedis              *redis.RedisConf
 
 	SMTP *struct {
 		Username string
