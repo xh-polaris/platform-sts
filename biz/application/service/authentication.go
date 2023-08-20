@@ -8,6 +8,7 @@ import (
 	"math/big"
 	"net/smtp"
 	"strconv"
+	"time"
 
 	"github.com/bytedance/sonic"
 	"github.com/google/wire"
@@ -56,6 +57,32 @@ func (s *AuthenticationService) SignIn(ctx context.Context, req *sts.SignInReq) 
 	}
 	if err != nil {
 		return nil, err
+	}
+	r, err := s.Redis.GetCtx(ctx, "signIn"+resp.UserId)
+	if err != nil {
+		return resp, nil
+	} else if r == "" {
+		resp.IsFirst = true
+		err = s.Redis.SetexCtx(ctx, "signIn"+resp.UserId, strconv.FormatInt(time.Now().Unix(), 10), 86400)
+		if err != nil {
+			resp.IsFirst = false
+			return resp, nil
+		}
+	} else {
+		m, err := strconv.ParseInt(r, 10, 64)
+		if err != nil {
+			return resp, nil
+		}
+		lastTime := time.Unix(m, 0)
+		err = s.Redis.SetexCtx(ctx, "signIn"+resp.UserId, strconv.FormatInt(time.Now().Unix(), 10), 86400)
+		if err != nil {
+			return resp, nil
+		}
+		if lastTime.Day() == time.Now().Day() && lastTime.Month() == time.Now().Month() && lastTime.Year() == time.Now().Year() {
+			resp.IsFirst = false
+		} else {
+			resp.IsFirst = true
+		}
 	}
 	return resp, nil
 }
