@@ -12,7 +12,7 @@ require (
 	github.com/tencentyun/qcloud-cos-sts-sdk v0.0.0-20221108110633-dbdf102a1cdf
 	github.com/xh-polaris/service-idl-gen-go v0.0.0-20230817172708-01beb0169be4
 	github.com/zeromicro/go-zero v1.5.4
-	go.mongodb.org/mongo-driver v1.12.0
+	go.mongodb.org/mongo-driver v1.12.1
 	golang.org/x/crypto v0.11.0
 	google.golang.org/grpc v1.56.2
 )
