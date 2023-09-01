@@ -2,10 +2,10 @@ package provider
 
 import (
 	"github.com/google/wire"
-
 	"github.com/xh-polaris/platform-sts/biz/application/service"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/config"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/mapper"
+	"github.com/xh-polaris/platform-sts/biz/infrastructure/mq"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/sdk/cos"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/sdk/wechat"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/stores/redis"
@@ -26,6 +26,7 @@ var InfrastructureSet = wire.NewSet(
 	redis.NewRedis,
 	MapperSet,
 	SDKSet,
+	MqSet,
 )
 
 var SDKSet = wire.NewSet(
@@ -36,4 +37,9 @@ var SDKSet = wire.NewSet(
 var MapperSet = wire.NewSet(
 	mapper.NewUrlMapper,
 	mapper.NewUserMapper,
+)
+
+var MqSet = wire.NewSet(
+	mq.NewMqProducer,
+	mq.NewMqConsumer,
 )

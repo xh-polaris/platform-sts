@@ -28,7 +28,7 @@ type (
 		Insert(ctx context.Context, data *db.Url) error
 		FindOne(ctx context.Context, id string) (*db.Url, error)
 		Update(ctx context.Context, data *db.Url) error
-		Delete(ctx context.Context, id string) error
+		Delete(ctx context.Context, id primitive.ObjectID) error
 	}
 
 	urlMapper struct {
@@ -95,12 +95,8 @@ func (m *urlMapper) Update(ctx context.Context, data *db.Url) error {
 	return err
 }
 
-func (m *urlMapper) Delete(ctx context.Context, id string) error {
-	oid, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return consts.ErrInvalidObjectId
-	}
-	key := prefixUrlCacheKey + id
-	_, err = m.conn.DeleteOne(ctx, key, bson.M{"_id": oid})
+func (m *urlMapper) Delete(ctx context.Context, id primitive.ObjectID) error {
+	key := prefixUrlCacheKey + id.String()
+	_, err := m.conn.DeleteOne(ctx, key, bson.M{"_id": id})
 	return err
 }

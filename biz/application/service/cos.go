@@ -4,6 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/apache/rocketmq-client-go/v2"
+	"github.com/apache/rocketmq-client-go/v2/primitive"
+	"github.com/zeromicro/go-zero/core/jsonx"
 	"net/url"
 	"strconv"
 	"time"
@@ -36,6 +39,8 @@ type CosService struct {
 	CosClient      *cos.Client
 	UrlMapper      mapper.UrlMapper
 	MiniProgramMap wechat.MiniProgramMap
+	MqProducer     rocketmq.Producer
+	MqConsumer     rocketmq.PushConsumer
 }
 
 var CosSet = wire.NewSet(
@@ -100,7 +105,7 @@ func (s *CosService) GenSignedUrl(ctx context.Context, req *sts.GenSignedUrlReq)
 	if err != nil {
 		return nil, err
 	}
-	// go schedule.SendDelayMessage(&s.Config, signedUrl)
+	go s.SendDelayMessage(s.Config, signedUrl)
 	return &sts.GenSignedUrlResp{SignedUrl: signedUrl.String()}, nil
 }
 
@@ -171,4 +176,23 @@ func (s *CosService) PhotoCheck(ctx context.Context, req *sts.PhotoCheckReq) (*s
 		}
 	}
 	return &sts.PhotoCheckResp{Pass: true}, nil
+}
+
+func (s *CosService) SendDelayMessage(c *config.Config, message interface{}) {
+	json, _ := jsonx.Marshal(message)
+	msg := &primitive.Message{
+		Topic: "sts-self",
+		Body:  json,
+	}
+	// level 8 means delay 5min
+	msg.WithDelayTimeLevel(8)
+	res, err := s.MqProducer.SendSync(context.Background(), msg)
+	if err != nil || res.Status != primitive.SendOK {
+		for i := 0; i < 2; i++ {
+			res, err := s.MqProducer.SendSync(context.Background(), msg)
+			if err == nil && res.Status == primitive.SendOK {
+				break
+			}
+		}
+	}
 }
