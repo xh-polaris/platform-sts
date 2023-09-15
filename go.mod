@@ -13,10 +13,10 @@ require (
 	github.com/tencentyun/qcloud-cos-sts-sdk v0.0.0-20221108110633-dbdf102a1cdf
 	github.com/xh-polaris/gopkg v0.0.0-20230915071845-b0ecd425cb58
 	github.com/xh-polaris/service-idl-gen-go v0.0.0-20230909174338-cc6ca6a20ce5
-	github.com/zeromicro/go-zero v1.5.4
-	go.mongodb.org/mongo-driver v1.12.0
-	golang.org/x/crypto v0.11.0
-	google.golang.org/grpc v1.56.2
+	github.com/zeromicro/go-zero v1.5.5
+	go.mongodb.org/mongo-driver v1.12.1
+	golang.org/x/crypto v0.12.0
+	google.golang.org/grpc v1.57.0
 )
 
 require (
@@ -98,12 +98,12 @@ require (
 	go.opentelemetry.io/otel/trace v1.16.0 // indirect
 	go.opentelemetry.io/proto/otlp v0.19.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
-	go.uber.org/automaxprocs v1.5.2 // indirect
+	go.uber.org/automaxprocs v1.5.3 // indirect
 	golang.org/x/arch v0.2.0 // indirect
-	golang.org/x/net v0.12.0 // indirect
+	golang.org/x/net v0.14.0 // indirect
 	golang.org/x/sync v0.2.0 // indirect
-	golang.org/x/sys v0.10.0 // indirect
-	golang.org/x/text v0.11.0 // indirect
+	golang.org/x/sys v0.11.0 // indirect
+	golang.org/x/text v0.12.0 // indirect
 	google.golang.org/genproto v0.0.0-20230526203410-71b5a4ffd15e // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20230526203410-71b5a4ffd15e // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230526203410-71b5a4ffd15e // indirect
