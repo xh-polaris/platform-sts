@@ -13,6 +13,7 @@ import (
 	"github.com/bytedance/sonic"
 	"github.com/google/wire"
 	"github.com/silenceper/wechat/v2/util"
+	"github.com/xh-polaris/service-idl-gen-go/kitex_gen/platform/sts"
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"golang.org/x/crypto/bcrypt"
 
@@ -21,7 +22,6 @@ import (
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/data/db"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/mapper"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/sdk/wechat"
-	"github.com/xh-polaris/service-idl-gen-go/kitex_gen/platform/sts"
 )
 
 type IAuthenticationService interface {

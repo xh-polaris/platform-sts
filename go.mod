@@ -11,7 +11,8 @@ require (
 	github.com/silenceper/wechat/v2 v2.1.5
 	github.com/tencentyun/cos-go-sdk-v5 v0.7.41
 	github.com/tencentyun/qcloud-cos-sts-sdk v0.0.0-20221108110633-dbdf102a1cdf
-	github.com/xh-polaris/service-idl-gen-go v0.0.0-20230817172708-01beb0169be4
+	github.com/xh-polaris/gopkg v0.0.0-20230915071845-b0ecd425cb58
+	github.com/xh-polaris/service-idl-gen-go v0.0.0-20230909174338-cc6ca6a20ce5
 	github.com/zeromicro/go-zero v1.5.4
 	go.mongodb.org/mongo-driver v1.12.0
 	golang.org/x/crypto v0.11.0
@@ -33,6 +34,7 @@ require (
 	github.com/cloudwego/configmanager v0.2.0 // indirect
 	github.com/cloudwego/fastpb v0.0.4 // indirect
 	github.com/cloudwego/frugal v0.1.6 // indirect
+	github.com/cloudwego/hertz v0.6.6 // indirect
 	github.com/cloudwego/netpoll v0.4.1 // indirect
 	github.com/cloudwego/thriftgo v0.2.11 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
