@@ -2,8 +2,9 @@ package config
 
 import (
 	"fmt"
-	"github.com/zeromicro/go-zero/core/stores/redis"
 	"os"
+
+	"github.com/zeromicro/go-zero/core/stores/redis"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"

@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/apache/rocketmq-client-go/v2"
-	"github.com/apache/rocketmq-client-go/v2/primitive"
-	"github.com/zeromicro/go-zero/core/jsonx"
 	"net/url"
 	"strconv"
 	"time"
+
+	"github.com/apache/rocketmq-client-go/v2"
+	"github.com/apache/rocketmq-client-go/v2/primitive"
+	"github.com/zeromicro/go-zero/core/jsonx"
 
 	"github.com/google/wire"
 	"github.com/silenceper/wechat/v2/miniprogram/security"
