@@ -27,10 +27,10 @@ func main() {
 	}
 	svr := stsservice.NewServer(
 		s,
-		server.WithMiddleware(middleware.LogMiddleware(s.Name)),
 		server.WithServiceAddr(addr),
 		server.WithSuite(tracing.NewServerSuite()),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: s.Name}),
+		server.WithMiddleware(middleware.LogMiddleware(s.Name)),
 	)
 
 	err = svr.Run()
