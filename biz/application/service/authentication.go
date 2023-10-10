@@ -167,7 +167,7 @@ func (s *AuthenticationService) signInByWechat(ctx context.Context, req *sts.Sig
 		appId = m.GetContext().AppID
 	} else {
 		for _, conf := range s.Config.WechatApplicationConfigs {
-			if appId == conf.AppID {
+			if req.AuthId == conf.AppID {
 				res, err := util.HTTPGetContext(ctx, fmt.Sprintf(consts.OAuthUrl, conf.AppID, conf.AppSecret, jsCode))
 				if err != nil {
 					return "", "", "", "", err
