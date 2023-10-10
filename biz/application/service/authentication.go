@@ -176,7 +176,7 @@ func (s *AuthenticationService) signInByWechat(ctx context.Context, req *sts.Sig
 				if err = sonic.Unmarshal(res, &j); err != nil {
 					return "", "", "", "", err
 				}
-				if _, ok := j["unionid"]; !ok {
+				if id := j["unionid"]; id == "" {
 					return "", "", "", "", consts.ErrWrongWechatCode
 				}
 				unionId = j["unionid"].(string)
