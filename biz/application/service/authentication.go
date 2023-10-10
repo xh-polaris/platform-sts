@@ -189,6 +189,9 @@ func (s *AuthenticationService) signInByWechat(ctx context.Context, req *sts.Sig
 		}
 	}
 
+	if unionId == "" {
+		return "", "", "", "", consts.ErrWrongWechatCode
+	}
 	UserMapper := s.UserMapper
 	auth := db.Auth{
 		Type:  req.AuthType,
