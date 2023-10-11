@@ -138,6 +138,8 @@ func (s *AuthenticationService) checkVerifyCode(ctx context.Context, except stri
 			return false, nil
 		}
 		return false, err
+	} else if verifyCode == "" {
+		return false, nil
 	} else if verifyCode != except {
 		return false, nil
 	} else {
