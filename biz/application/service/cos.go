@@ -106,7 +106,7 @@ func (s *CosService) GenSignedUrl(ctx context.Context, req *sts.GenSignedUrlReq)
 	if err != nil {
 		return nil, err
 	}
-	go s.SendDelayMessage(s.Config, signedUrl)
+	s.SendDelayMessage(s.Config, signedUrl)
 	return &sts.GenSignedUrlResp{SignedUrl: signedUrl.String()}, nil
 }
 
@@ -186,7 +186,7 @@ func (s *CosService) SendDelayMessage(c *config.Config, message interface{}) {
 		Body:  json,
 	}
 	// level 8 means delay 5min
-	msg.WithDelayTimeLevel(8)
+	msg.WithDelayTimeLevel(18)
 	res, err := s.MqProducer.SendSync(context.Background(), msg)
 	if err != nil || res.Status != primitive.SendOK {
 		for i := 0; i < 2; i++ {
