@@ -106,7 +106,7 @@ func (s *CosService) GenSignedUrl(ctx context.Context, req *sts.GenSignedUrlReq)
 	if err != nil {
 		return nil, err
 	}
-	s.SendDelayMessage(s.Config, signedUrl)
+	//s.SendDelayMessage(s.Config, signedUrl)
 	return &sts.GenSignedUrlResp{SignedUrl: signedUrl.String()}, nil
 }
 
