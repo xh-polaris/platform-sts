@@ -3,19 +3,21 @@ package mq
 import (
 	"context"
 	"fmt"
+	"log"
+	"net/url"
+	"sync"
+
 	"github.com/apache/rocketmq-client-go/v2"
 	consumer2 "github.com/apache/rocketmq-client-go/v2/consumer"
 	"github.com/apache/rocketmq-client-go/v2/primitive"
 	"github.com/tencentyun/cos-go-sdk-v5"
+	"github.com/zeromicro/go-zero/core/jsonx"
+	"github.com/zeromicro/go-zero/core/logx"
+
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/config"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/consts"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/mapper"
 	cos2 "github.com/xh-polaris/platform-sts/biz/infrastructure/sdk/cos"
-	"github.com/zeromicro/go-zero/core/jsonx"
-	"github.com/zeromicro/go-zero/core/logx"
-	"log"
-	"net/url"
-	"sync"
 )
 
 type DelayUrlMessage url.URL
@@ -88,6 +90,7 @@ func DelayMessageHandler(c *config.Config, b []byte) error {
 	} else {
 		// 最大重复三次，如果不行就留存数据库，后期可以通过脚本删除
 		res, err := cosClient.Object.Delete(context.Background(), msg.Path)
+
 		suc := false
 		if err != nil || res.StatusCode != 200 {
 			for i := 0; i < 2; i++ {
