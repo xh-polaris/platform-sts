@@ -47,3 +47,7 @@ func (s *StsServerImpl) SetPassword(ctx context.Context, req *sts.SetPasswordReq
 func (s *StsServerImpl) SendVerifyCode(ctx context.Context, req *sts.SendVerifyCodeReq) (res *sts.SendVerifyCodeResp, err error) {
 	return s.AuthenticationService.SendVerifyCode(ctx, req)
 }
+
+func (s *StsServerImpl) AddUserAuth(ctx context.Context, req *sts.AddUserAuthReq) (res *sts.AddUserAuthResp, err error) {
+	return s.AuthenticationService.AddUserAuth(ctx, req)
+}

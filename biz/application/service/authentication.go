@@ -8,12 +8,14 @@ import (
 	"math/big"
 	"net/smtp"
 	"strconv"
+	"time"
 
 	"github.com/bytedance/sonic"
 	"github.com/google/wire"
 	"github.com/silenceper/wechat/v2/util"
 	"github.com/xh-polaris/service-idl-gen-go/kitex_gen/platform/sts"
 	"github.com/zeromicro/go-zero/core/stores/redis"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/config"
@@ -27,6 +29,7 @@ type IAuthenticationService interface {
 	SignIn(ctx context.Context, req *sts.SignInReq) (*sts.SignInResp, error)
 	SetPassword(ctx context.Context, req *sts.SetPasswordReq) (*sts.SetPasswordResp, error)
 	SendVerifyCode(ctx context.Context, req *sts.SendVerifyCodeReq) (*sts.SendVerifyCodeResp, error)
+	AddUserAuth(ctx context.Context, req *sts.AddUserAuthReq) (*sts.AddUserAuthResp, error)
 }
 
 type AuthenticationService struct {
@@ -40,6 +43,29 @@ var AuthenticationSet = wire.NewSet(
 	wire.Struct(new(AuthenticationService), "*"),
 	wire.Bind(new(IAuthenticationService), new(*AuthenticationService)),
 )
+
+func (s *AuthenticationService) AddUserAuth(ctx context.Context, req *sts.AddUserAuthReq) (*sts.AddUserAuthResp, error) {
+	resp := &sts.AddUserAuthResp{}
+	oid, err := primitive.ObjectIDFromHex(req.UserId)
+	if err != nil {
+		return nil, consts.ErrInvalidObjectId
+	}
+	auth := make([]db.Auth, 0)
+	auth = append(auth, db.Auth{
+		Type:  req.Type,
+		Value: req.UnionId,
+	})
+	err = s.UserMapper.Insert(ctx, &db.User{
+		ID:       oid,
+		CreateAt: time.Now(),
+		UpdateAt: time.Now(),
+		Auth:     auth,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
 
 func (s *AuthenticationService) SignIn(ctx context.Context, req *sts.SignInReq) (*sts.SignInResp, error) {
 	resp := &sts.SignInResp{}

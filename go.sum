@@ -443,8 +443,8 @@ github.com/xdg-go/stringprep v1.0.4 h1:XLI/Ng3O1Atzq0oBs3TWm+5ZVgkq2aqdlvP9JtoZ6
 github.com/xdg-go/stringprep v1.0.4/go.mod h1:mPGuuIYwz7CmR2bT9j4GbQqutWS1zV24gijq1dTyGkM=
 github.com/xh-polaris/gopkg v0.0.0-20230915071845-b0ecd425cb58 h1:Abqs8kG9hXr+SExatusfXgT42QX6dOB4StEmMppUtXg=
 github.com/xh-polaris/gopkg v0.0.0-20230915071845-b0ecd425cb58/go.mod h1:eFkuwj6uq1k4hbDa66TijCWGL4PrNeWaNmAnxfWDeU0=
-github.com/xh-polaris/service-idl-gen-go v0.0.0-20231101061413-e1759adaa141 h1:as3Qo5RYIezn4/u+LuCOXYmn+3R3/Kj+oJHo5vhZ8to=
-github.com/xh-polaris/service-idl-gen-go v0.0.0-20231101061413-e1759adaa141/go.mod h1:KjBt4ZOfugCsdAbFlrniKMDrpJAJobm8KEezTvKVnJM=
+github.com/xh-polaris/service-idl-gen-go v0.0.0-20231115070446-eb5d5cb52b6b h1:NNpY78ZBmGqFoCmKPpflEQbFr7XFhb9DHtaNTkE7p9g=
+github.com/xh-polaris/service-idl-gen-go v0.0.0-20231115070446-eb5d5cb52b6b/go.mod h1:KjBt4ZOfugCsdAbFlrniKMDrpJAJobm8KEezTvKVnJM=
 github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d h1:splanxYIlg+5LfHAM6xpdFEAYOk8iySO56hMFq6uLyA=
 github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d/go.mod h1:rHwXgn7JulP+udvsHwJoVG1YGAP6VLg4y9I5dyZdqmA=
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
