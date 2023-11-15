@@ -14,7 +14,7 @@ require (
 	github.com/xh-polaris/gopkg v0.0.0-20230915071845-b0ecd425cb58
 	github.com/xh-polaris/service-idl-gen-go v0.0.0-20231115070446-eb5d5cb52b6b
 	github.com/zeromicro/go-zero v1.5.4
-	go.mongodb.org/mongo-driver v1.12.0
+	go.mongodb.org/mongo-driver v1.12.1
 	golang.org/x/crypto v0.11.0
 	google.golang.org/grpc v1.56.2
 )
