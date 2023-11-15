@@ -46,25 +46,33 @@ var AuthenticationSet = wire.NewSet(
 
 func (s *AuthenticationService) AddUserAuth(ctx context.Context, req *sts.AddUserAuthReq) (*sts.AddUserAuthResp, error) {
 	resp := &sts.AddUserAuthResp{}
-	oid, err := primitive.ObjectIDFromHex(req.UserId)
-	if err != nil {
-		return nil, consts.ErrInvalidObjectId
-	}
-	auth := make([]db.Auth, 0)
-	auth = append(auth, db.Auth{
-		Type:  req.Type,
-		Value: req.UnionId,
-	})
-	err = s.UserMapper.Insert(ctx, &db.User{
-		ID:       oid,
-		CreateAt: time.Now(),
-		UpdateAt: time.Now(),
-		Auth:     auth,
-	})
-	if err != nil {
+	_, err := s.UserMapper.FindOne(ctx, req.UserId)
+	switch err {
+	case nil:
+		return resp, nil
+	case consts.ErrNotFound:
+		oid, err := primitive.ObjectIDFromHex(req.UserId)
+		if err != nil {
+			return nil, consts.ErrInvalidObjectId
+		}
+		auth := make([]db.Auth, 0)
+		auth = append(auth, db.Auth{
+			Type:  req.Type,
+			Value: req.UnionId,
+		})
+		err = s.UserMapper.Insert(ctx, &db.User{
+			ID:       oid,
+			CreateAt: time.Now(),
+			UpdateAt: time.Now(),
+			Auth:     auth,
+		})
+		if err != nil {
+			return nil, err
+		}
+		return resp, nil
+	default:
 		return nil, err
 	}
-	return resp, nil
 }
 
 func (s *AuthenticationService) SignIn(ctx context.Context, req *sts.SignInReq) (*sts.SignInResp, error) {
