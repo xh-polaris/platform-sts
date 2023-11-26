@@ -120,6 +120,10 @@ func (s *CosService) DeleteObject(ctx context.Context, req *sts.DeleteObjectReq)
 
 func (s *CosService) TextCheck(ctx context.Context, req *sts.TextCheckReq) (*sts.TextCheckResp, error) {
 	user := req.User.WechatUserMeta
+	if user.AppId == "" {
+		user.AppId = s.Config.DefaultWechatUser.AppId
+		user.OpenId = s.Config.DefaultWechatUser.OpenId
+	}
 	mp := s.MiniProgramMap[user.AppId]
 	if mp == nil {
 		log.CtxError(ctx, "[TextCheck] appId not found")

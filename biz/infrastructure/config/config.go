@@ -35,8 +35,8 @@ type Config struct {
 	WechatApplicationConfigs []*WechatApplicationConfig
 	Redis                    *redis.RedisConf
 	WeChatRedis              *redis.RedisConf
-
-	SMTP *struct {
+	DefaultWechatUser        *DefaultWechatUser
+	SMTP                     *struct {
 		Username string
 		Password string
 		Host     string
@@ -51,6 +51,11 @@ type Config struct {
 		Retry     int
 		GroupName string
 	}
+}
+
+type DefaultWechatUser struct {
+	AppId  string
+	OpenId string
 }
 
 type WechatApplicationConfig struct {
