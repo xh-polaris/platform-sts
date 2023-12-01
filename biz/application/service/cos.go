@@ -22,6 +22,7 @@ import (
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/consts"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/mapper"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/sdk/wechat"
+	"github.com/xh-polaris/platform-sts/biz/infrastructure/util"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/util/log"
 )
 
@@ -153,7 +154,8 @@ func (s *CosService) PhotoCheck(ctx context.Context, req *sts.PhotoCheckReq) (*s
 		Input: input,
 		Conf:  &cos.ImageAuditingJobConf{},
 	}
-	res, _, err := s.CosClient.CI.BatchImageAuditing(ctx, opt)
+	res, resp, err := s.CosClient.CI.BatchImageAuditing(ctx, opt)
+	log.CtxInfo(ctx, "[PhotoCheck] res=%s, resp=%s, err=%v", util.JSONF(res), util.JSONF(resp), err)
 	if err != nil {
 		return nil, err
 	}
