@@ -15,7 +15,7 @@ import (
 
 const (
 	UserCollectionName = "user"
-	prefixUserCacheKey = "cache:user:"
+	prefixUserCacheKey = "cache:auth:"
 )
 
 var _ UserMapper = (*userMapper)(nil)

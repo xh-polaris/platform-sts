@@ -20,7 +20,6 @@ import (
 
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/config"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/consts"
-	"github.com/xh-polaris/platform-sts/biz/infrastructure/data/db"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/mapper"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/sdk/wechat"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/util/log"
@@ -97,12 +96,6 @@ func (s *CosService) GenCosSts(ctx context.Context, req *sts.GenCosStsReq) (*sts
 
 func (s *CosService) GenSignedUrl(ctx context.Context, req *sts.GenSignedUrlReq) (*sts.GenSignedUrlResp, error) {
 	signedUrl, err := s.CosClient.Object.GetPresignedURL(ctx, req.Method, req.Path, req.SecretId, req.SecretKey, time.Minute, nil)
-	if err != nil {
-		return nil, err
-	}
-	err = s.UrlMapper.Insert(ctx, &db.Url{
-		Url: signedUrl.Scheme + "://" + signedUrl.Host + signedUrl.Path,
-	})
 	if err != nil {
 		return nil, err
 	}
