@@ -34,14 +34,12 @@ func NewStsServerImpl() (*adaptor.StsServerImpl, error) {
 	if err != nil {
 		return nil, err
 	}
-	pushConsumer := mq.NewMqConsumer(configConfig)
 	cosService := &service.CosService{
 		Config:         configConfig,
 		CosSDK:         cosSDK,
 		UrlMapper:      urlMapper,
 		MiniProgramMap: miniProgramMap,
 		MqProducer:     producer,
-		MqConsumer:     pushConsumer,
 	}
 	userMapper := mapper.NewUserMapper(configConfig)
 	redisRedis := redis.NewRedis(configConfig)

@@ -2,6 +2,7 @@ package provider
 
 import (
 	"github.com/google/wire"
+
 	"github.com/xh-polaris/platform-sts/biz/application/service"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/config"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/mapper"
@@ -41,5 +42,4 @@ var MapperSet = wire.NewSet(
 
 var MqSet = wire.NewSet(
 	mq.NewMqProducer,
-	mq.NewMqConsumer,
 )

@@ -40,7 +40,6 @@ type CosService struct {
 	UrlMapper      mapper.UrlMapper
 	MiniProgramMap wechat.MiniProgramMap
 	MqProducer     rocketmq.Producer
-	MqConsumer     rocketmq.PushConsumer
 }
 
 var CosSet = wire.NewSet(
