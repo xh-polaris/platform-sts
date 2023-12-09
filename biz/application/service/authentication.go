@@ -12,7 +12,6 @@ import (
 
 	"github.com/bytedance/sonic"
 	"github.com/google/wire"
-	"github.com/silenceper/wechat/v2/util"
 	"github.com/xh-polaris/service-idl-gen-go/kitex_gen/platform/sts"
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -23,6 +22,7 @@ import (
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/data/db"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/mapper"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/sdk/wechat"
+	"github.com/xh-polaris/platform-sts/biz/infrastructure/util"
 )
 
 type IAuthenticationService interface {
@@ -165,7 +165,7 @@ func (s *AuthenticationService) signInByWechat(ctx context.Context, req *sts.Sig
 	m := s.MiniProgramMap[req.GetAuthId()]
 	if m != nil {
 		// 向微信开放接口提交临时code
-		res, err := m.GetAuth().Code2SessionContext(ctx, jsCode)
+		res, err := m.Code2Session(ctx, jsCode)
 		if err != nil {
 			return "", "", "", "", err
 		} else if res.ErrCode != 0 {
@@ -173,11 +173,11 @@ func (s *AuthenticationService) signInByWechat(ctx context.Context, req *sts.Sig
 		}
 		unionId = res.UnionID
 		openId = res.OpenID
-		appId = m.GetContext().AppID
+		appId = req.GetAuthId()
 	} else {
 		for _, conf := range s.Config.WechatApplicationConfigs {
 			if req.AuthId == conf.AppID {
-				res, err := util.HTTPGetContext(ctx, fmt.Sprintf(consts.OAuthUrl, conf.AppID, conf.AppSecret, jsCode))
+				res, err := util.HTTPGet(ctx, fmt.Sprintf(consts.OAuthUrl, conf.AppID, conf.AppSecret, jsCode))
 				if err != nil {
 					return "", "", "", "", err
 				}

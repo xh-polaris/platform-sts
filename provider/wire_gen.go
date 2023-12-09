@@ -24,8 +24,7 @@ func NewStsServerImpl() (*adaptor.StsServerImpl, error) {
 	if err != nil {
 		return nil, err
 	}
-	client := cos.NewStsClient(configConfig)
-	cosClient, err := cos.NewCosClient(configConfig)
+	cosSDK, err := cos.NewCosSDK(configConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -38,8 +37,7 @@ func NewStsServerImpl() (*adaptor.StsServerImpl, error) {
 	pushConsumer := mq.NewMqConsumer(configConfig)
 	cosService := &service.CosService{
 		Config:         configConfig,
-		StsClient:      client,
-		CosClient:      cosClient,
+		CosSDK:         cosSDK,
 		UrlMapper:      urlMapper,
 		MiniProgramMap: miniProgramMap,
 		MqProducer:     producer,

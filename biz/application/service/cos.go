@@ -10,17 +10,17 @@ import (
 
 	"github.com/apache/rocketmq-client-go/v2"
 	"github.com/apache/rocketmq-client-go/v2/primitive"
-	"github.com/zeromicro/go-zero/core/jsonx"
-
 	"github.com/google/wire"
 	"github.com/silenceper/wechat/v2/miniprogram/security"
-	"github.com/tencentyun/cos-go-sdk-v5"
+	cossdk "github.com/tencentyun/cos-go-sdk-v5"
 	cossts "github.com/tencentyun/qcloud-cos-sts-sdk/go"
 	"github.com/xh-polaris/service-idl-gen-go/kitex_gen/platform/sts"
+	"github.com/zeromicro/go-zero/core/jsonx"
 
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/config"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/consts"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/mapper"
+	"github.com/xh-polaris/platform-sts/biz/infrastructure/sdk/cos"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/sdk/wechat"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/util"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/util/log"
@@ -36,8 +36,7 @@ type ICosService interface {
 
 type CosService struct {
 	Config         *config.Config
-	StsClient      *cossts.Client
-	CosClient      *cos.Client
+	CosSDK         *cos.CosSDK
 	UrlMapper      mapper.UrlMapper
 	MiniProgramMap wechat.MiniProgramMap
 	MqProducer     rocketmq.Producer
@@ -81,7 +80,7 @@ func (s *CosService) GenCosSts(ctx context.Context, req *sts.GenCosStsReq) (*sts
 		},
 	}
 
-	res, err := s.StsClient.GetCredential(stsOption)
+	res, err := s.CosSDK.GetCredential(ctx, stsOption)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +95,7 @@ func (s *CosService) GenCosSts(ctx context.Context, req *sts.GenCosStsReq) (*sts
 }
 
 func (s *CosService) GenSignedUrl(ctx context.Context, req *sts.GenSignedUrlReq) (*sts.GenSignedUrlResp, error) {
-	signedUrl, err := s.CosClient.Object.GetPresignedURL(ctx, req.Method, req.Path, req.SecretId, req.SecretKey, time.Minute, nil)
+	signedUrl, err := s.CosSDK.GetPresignedURL(ctx, req.Method, req.Path, req.SecretId, req.SecretKey, time.Minute, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +104,7 @@ func (s *CosService) GenSignedUrl(ctx context.Context, req *sts.GenSignedUrlReq)
 }
 
 func (s *CosService) DeleteObject(ctx context.Context, req *sts.DeleteObjectReq) (*sts.DeleteObjectResp, error) {
-	res, err := s.CosClient.Object.Delete(ctx, req.Path)
+	res, err := s.CosSDK.Delete(ctx, req.Path)
 	if err != nil || res.StatusCode != 200 {
 		return nil, consts.ErrCannotDeleteObject
 	}
@@ -123,7 +122,7 @@ func (s *CosService) TextCheck(ctx context.Context, req *sts.TextCheckReq) (*sts
 		log.CtxError(ctx, "[TextCheck] appId not found")
 		return &sts.TextCheckResp{Pass: false}, nil
 	}
-	checkRes, err := mp.GetSecurity().MsgCheck(&security.MsgCheckRequest{
+	checkRes, err := mp.MsgCheck(ctx, &security.MsgCheckRequest{
 		OpenID:  user.OpenId,
 		Scene:   security.MsgScene(req.GetScene()),
 		Content: req.GetText(),
@@ -143,18 +142,18 @@ func (s *CosService) TextCheck(ctx context.Context, req *sts.TextCheckReq) (*sts
 }
 
 func (s *CosService) PhotoCheck(ctx context.Context, req *sts.PhotoCheckReq) (*sts.PhotoCheckResp, error) {
-	var input []cos.ImageAuditingInputOptions
+	var input []cossdk.ImageAuditingInputOptions
 	for key, rawUrl := range req.GetUrl() {
-		input = append(input, cos.ImageAuditingInputOptions{
+		input = append(input, cossdk.ImageAuditingInputOptions{
 			DataId: strconv.Itoa(key),
 			Url:    rawUrl,
 		})
 	}
-	opt := &cos.BatchImageAuditingOptions{
+	opt := &cossdk.BatchImageAuditingOptions{
 		Input: input,
-		Conf:  &cos.ImageAuditingJobConf{},
+		Conf:  &cossdk.ImageAuditingJobConf{},
 	}
-	res, resp, err := s.CosClient.CI.BatchImageAuditing(ctx, opt)
+	res, resp, err := s.CosSDK.BatchImageAuditing(ctx, opt)
 	log.CtxInfo(ctx, "[PhotoCheck] res=%s, resp=%s, err=%v", util.JSONF(res), util.JSONF(resp), err)
 	if err != nil {
 		return nil, err
@@ -167,7 +166,7 @@ func (s *CosService) PhotoCheck(ctx context.Context, req *sts.PhotoCheckReq) (*s
 				if err != nil {
 					return nil, err
 				}
-				_, err = s.CosClient.Object.Delete(ctx, u.Path)
+				_, err = s.CosSDK.Delete(ctx, u.Path)
 				if err != nil {
 					return nil, err
 				}
