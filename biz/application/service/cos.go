@@ -8,14 +8,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/apache/rocketmq-client-go/v2"
-	"github.com/apache/rocketmq-client-go/v2/primitive"
 	"github.com/google/wire"
 	"github.com/silenceper/wechat/v2/miniprogram/security"
 	cossdk "github.com/tencentyun/cos-go-sdk-v5"
 	cossts "github.com/tencentyun/qcloud-cos-sts-sdk/go"
 	"github.com/xh-polaris/service-idl-gen-go/kitex_gen/platform/sts"
-	"github.com/zeromicro/go-zero/core/jsonx"
 
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/config"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/consts"
@@ -39,7 +36,6 @@ type CosService struct {
 	CosSDK         *cos.CosSDK
 	UrlMapper      mapper.UrlMapper
 	MiniProgramMap wechat.MiniProgramMap
-	MqProducer     rocketmq.Producer
 }
 
 var CosSet = wire.NewSet(
@@ -174,23 +170,4 @@ func (s *CosService) PhotoCheck(ctx context.Context, req *sts.PhotoCheckReq) (*s
 		}
 	}
 	return &sts.PhotoCheckResp{Pass: true}, nil
-}
-
-func (s *CosService) SendDelayMessage(c *config.Config, message interface{}) {
-	json, _ := jsonx.Marshal(message)
-	msg := &primitive.Message{
-		Topic: "sts-self",
-		Body:  json,
-	}
-	// level 8 means delay 5min
-	msg.WithDelayTimeLevel(18)
-	res, err := s.MqProducer.SendSync(context.Background(), msg)
-	if err != nil || res.Status != primitive.SendOK {
-		for i := 0; i < 2; i++ {
-			res, err := s.MqProducer.SendSync(context.Background(), msg)
-			if err == nil && res.Status == primitive.SendOK {
-				break
-			}
-		}
-	}
 }

@@ -11,7 +11,6 @@ import (
 	"github.com/xh-polaris/platform-sts/biz/application/service"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/config"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/mapper"
-	"github.com/xh-polaris/platform-sts/biz/infrastructure/mq"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/sdk/cos"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/sdk/wechat"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/stores/redis"
@@ -30,16 +29,11 @@ func NewStsServerImpl() (*adaptor.StsServerImpl, error) {
 	}
 	urlMapper := mapper.NewUrlMapper(configConfig)
 	miniProgramMap := wechat.NewWechatApplicationMap(configConfig)
-	producer, err := mq.NewMqProducer(configConfig)
-	if err != nil {
-		return nil, err
-	}
 	cosService := &service.CosService{
 		Config:         configConfig,
 		CosSDK:         cosSDK,
 		UrlMapper:      urlMapper,
 		MiniProgramMap: miniProgramMap,
-		MqProducer:     producer,
 	}
 	userMapper := mapper.NewUserMapper(configConfig)
 	redisRedis := redis.NewRedis(configConfig)

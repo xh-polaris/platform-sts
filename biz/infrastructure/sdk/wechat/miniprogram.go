@@ -23,26 +23,42 @@ type RedisPlus struct {
 }
 
 func (r *RedisPlus) Get(key string) interface{} {
-	data, err := r.Redis.GetCtx(context.Background(), key)
+	panic("implement me")
+}
+
+func (r *RedisPlus) Set(key string, val interface{}, timeout time.Duration) error {
+	panic("implement me")
+}
+
+func (r *RedisPlus) IsExist(key string) bool {
+	panic("implement me")
+}
+
+func (r *RedisPlus) Delete(key string) error {
+	panic("implement me")
+}
+
+func (r *RedisPlus) GetContext(ctx context.Context, key string) interface{} {
+	data, err := r.Redis.GetCtx(ctx, key)
 	if err != nil || data == "" {
 		return nil
 	}
 	return data
 }
 
-func (r *RedisPlus) Set(key string, val interface{}, timeout time.Duration) error {
+func (r *RedisPlus) SetContext(ctx context.Context, key string, val interface{}, timeout time.Duration) error {
 	str := fmt.Sprintf("%v", val)
-	err := r.Redis.SetexCtx(context.Background(), key, str, int(timeout.Seconds()))
+	err := r.Redis.SetexCtx(ctx, key, str, int(timeout.Seconds()))
 	return err
 }
 
-func (r *RedisPlus) IsExist(key string) bool {
-	data, _ := r.Redis.Exists(key)
+func (r *RedisPlus) IsExistContext(ctx context.Context, key string) bool {
+	data, _ := r.Redis.ExistsCtx(ctx, key)
 	return data
 }
 
-func (r *RedisPlus) Delete(key string) error {
-	_, err := r.Redis.Del(key)
+func (r *RedisPlus) DeleteContext(ctx context.Context, key string) error {
+	_, err := r.Redis.DelCtx(ctx, key)
 	return err
 }
 
@@ -63,6 +79,7 @@ func (s *MiniProgramSDK) MsgCheck(ctx context.Context, in *security.MsgCheckRequ
 	}()
 	return s.sdk.GetSecurity().MsgCheck(in)
 }
+
 func (s *MiniProgramSDK) Code2Session(ctx context.Context, jsCode string) (result auth.ResCode2Session, err error) {
 	ctx, span := trace.TracerFromContext(ctx).Start(ctx, "mp/auth/Code2Session", oteltrace.WithTimestamp(time.Now()), oteltrace.WithSpanKind(oteltrace.SpanKindClient))
 	defer func() {
