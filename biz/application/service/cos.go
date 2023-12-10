@@ -148,8 +148,8 @@ func (s *CosService) PhotoCheck(ctx context.Context, req *sts.PhotoCheckReq) (*s
 		Input: input,
 		Conf:  &cossdk.ImageAuditingJobConf{},
 	}
-	res, resp, err := s.CosSDK.BatchImageAuditing(ctx, opt)
-	log.CtxInfo(ctx, "[PhotoCheck] res=%s, resp=%s, err=%v", util.JSONF(res), util.JSONF(resp), err)
+	res, _, err := s.CosSDK.BatchImageAuditing(ctx, opt)
+	log.CtxInfo(ctx, "[PhotoCheck] res=%s, err=%v", util.JSONF(res), err)
 	if err != nil {
 		return nil, err
 	}
