@@ -1,8 +1,9 @@
 package db
 
 import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type User struct {
@@ -16,4 +17,5 @@ type User struct {
 type Auth struct {
 	Type  string `bson:"type" json:"type"`
 	Value string `bson:"value" json:"value"`
+	AppId string `bson:"appId,omitempty" json:"appId,omitempty"`
 }

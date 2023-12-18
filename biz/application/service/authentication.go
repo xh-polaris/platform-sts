@@ -83,6 +83,8 @@ func (s *AuthenticationService) SignIn(ctx context.Context, req *sts.SignInReq) 
 		fallthrough
 	case consts.AuthTypePhone:
 		resp.UserId, err = s.signInByPassword(ctx, req)
+	case consts.AuthTypeWechatOpenId:
+		fallthrough
 	case consts.AuthTypeWechat:
 		resp.UserId, resp.UnionId, resp.OpenId, resp.AppId, err = s.signInByWechat(ctx, req)
 	default:
@@ -206,11 +208,38 @@ func (s *AuthenticationService) signInByWechat(ctx context.Context, req *sts.Sig
 		Type:  req.AuthType,
 		Value: unionId,
 	}
+	if req.AuthType == "wechat-openid" {
+		auth.AppId = appId
+		auth.Value = openId
+	}
 	user, err := UserMapper.FindOneByAuth(ctx, auth)
 	switch err {
 	case nil:
+		t := true
+		for _, v := range user.Auth {
+			if v.Type == "wechat-openid" {
+				t = false
+			}
+		}
+		if t {
+			openAuth := db.Auth{
+				Type:  "wechat-openid",
+				Value: openId,
+				AppId: appId,
+			}
+			user.Auth = append(user.Auth, openAuth)
+			err := UserMapper.Update(ctx, user)
+			if err != nil {
+				return "", "", "", "", err
+			}
+		}
 	case consts.ErrNotFound:
-		user = &db.User{Auth: []db.Auth{auth}}
+		openAuth := db.Auth{
+			Type:  "wechat-openid",
+			Value: openId,
+			AppId: appId,
+		}
+		user = &db.User{Auth: []db.Auth{auth, openAuth}}
 		err = UserMapper.Insert(ctx, user)
 		if err != nil {
 			return "", "", "", "", err

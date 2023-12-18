@@ -21,9 +21,10 @@ var (
 )
 
 const (
-	AuthTypeEmail  = "email"
-	AuthTypePhone  = "phone"
-	AuthTypeWechat = "wechat"
+	AuthTypeEmail        = "email"
+	AuthTypePhone        = "phone"
+	AuthTypeWechat       = "wechat"
+	AuthTypeWechatOpenId = "wechat-openid"
 )
 
 const (
