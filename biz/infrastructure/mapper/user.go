@@ -24,7 +24,7 @@ type (
 	// UserMapper is an interface to be customized, add more methods here,
 	// and implement the added methods in customUserMapper.
 	UserMapper interface {
-		FindOneByAuth(ctx context.Context, auth db.Auth) (*db.User, error)
+		FindOneByAuth(ctx context.Context, auth *db.Auth) (*db.User, error)
 		Insert(ctx context.Context, data *db.User) error
 		FindOne(ctx context.Context, id string) (*db.User, error)
 		Update(ctx context.Context, data *db.User) error
@@ -44,7 +44,7 @@ func NewUserMapper(config *config.Config) UserMapper {
 	}
 }
 
-func (m *userMapper) FindOneByAuth(ctx context.Context, auth db.Auth) (*db.User, error) {
+func (m *userMapper) FindOneByAuth(ctx context.Context, auth *db.Auth) (*db.User, error) {
 	var data db.User
 	err := m.conn.FindOneNoCache(ctx, &data, bson.M{"auth": auth})
 	switch err {

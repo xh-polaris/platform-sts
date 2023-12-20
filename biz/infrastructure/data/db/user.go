@@ -11,7 +11,7 @@ type User struct {
 	UpdateAt time.Time          `bson:"updateAt,omitempty" json:"updateAt,omitempty"`
 	CreateAt time.Time          `bson:"createAt,omitempty" json:"createAt,omitempty"`
 	Password string             `bson:"password,omitempty" json:"password,omitempty"`
-	Auth     []Auth             `bson:"auth,omitempty" json:"auth,omitempty"`
+	Auth     []*Auth            `bson:"auth,omitempty" json:"auth,omitempty"`
 }
 
 type Auth struct {

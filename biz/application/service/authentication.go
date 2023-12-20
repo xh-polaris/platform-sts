@@ -12,6 +12,7 @@ import (
 
 	"github.com/bytedance/sonic"
 	"github.com/google/wire"
+	"github.com/samber/lo"
 	"github.com/xh-polaris/service-idl-gen-go/kitex_gen/platform/sts"
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -55,8 +56,8 @@ func (s *AuthenticationService) AddUserAuth(ctx context.Context, req *sts.AddUse
 		if err != nil {
 			return nil, consts.ErrInvalidObjectId
 		}
-		auth := make([]db.Auth, 0)
-		auth = append(auth, db.Auth{
+		auth := make([]*db.Auth, 0)
+		auth = append(auth, &db.Auth{
 			Type:  req.Type,
 			Value: req.UnionId,
 		})
@@ -105,7 +106,7 @@ func (s *AuthenticationService) signInByPassword(ctx context.Context, req *sts.S
 		return "", err
 	}
 
-	auth := db.Auth{
+	auth := &db.Auth{
 		Type:  req.AuthType,
 		Value: req.AuthId,
 	}
@@ -118,7 +119,7 @@ func (s *AuthenticationService) signInByPassword(ctx context.Context, req *sts.S
 			return "", consts.ErrNoSuchUser
 		}
 
-		user = &db.User{Auth: []db.Auth{auth}}
+		user = &db.User{Auth: []*db.Auth{auth}}
 		err := UserMapper.Insert(ctx, user)
 		if err != nil {
 			return "", err
@@ -204,42 +205,47 @@ func (s *AuthenticationService) signInByWechat(ctx context.Context, req *sts.Sig
 		return "", "", "", "", consts.ErrWrongWechatCode
 	}
 	UserMapper := s.UserMapper
-	auth := db.Auth{
+	auth := &db.Auth{
 		Type:  req.AuthType,
 		Value: unionId,
 	}
-	if req.AuthType == "wechat-openid" {
+	if req.AuthType == consts.AuthTypeWechatOpenId {
 		auth.AppId = appId
 		auth.Value = openId
 	}
 	user, err := UserMapper.FindOneByAuth(ctx, auth)
 	switch err {
 	case nil:
-		t := true
-		for _, v := range user.Auth {
-			if v.Type == "wechat-openid" {
-				t = false
-			}
+		openAuth := &db.Auth{
+			Type:  consts.AuthTypeWechatOpenId,
+			Value: openId,
+			AppId: appId,
 		}
-		if t {
-			openAuth := db.Auth{
-				Type:  "wechat-openid",
-				Value: openId,
-				AppId: appId,
-			}
+		_, ok := lo.Find(user.Auth, func(item *db.Auth) bool {
+			return *item == *openAuth
+		})
+		if !ok {
+
 			user.Auth = append(user.Auth, openAuth)
 			err := UserMapper.Update(ctx, user)
 			if err != nil {
 				return "", "", "", "", err
 			}
 		}
+		return user.ID.Hex(), unionId, openId, appId, nil
 	case consts.ErrNotFound:
-		openAuth := db.Auth{
-			Type:  "wechat-openid",
+		auths := []*db.Auth{{
+			Type:  consts.AuthTypeWechatOpenId,
 			Value: openId,
 			AppId: appId,
+		}}
+		if unionId != "" {
+			auths = append(auths, &db.Auth{
+				Type:  consts.AuthTypeWechat,
+				Value: unionId,
+			})
 		}
-		user = &db.User{Auth: []db.Auth{auth, openAuth}}
+		user = &db.User{Auth: auths}
 		err = UserMapper.Insert(ctx, user)
 		if err != nil {
 			return "", "", "", "", err
@@ -248,8 +254,6 @@ func (s *AuthenticationService) signInByWechat(ctx context.Context, req *sts.Sig
 	default:
 		return "", "", "", "", err
 	}
-
-	return user.ID.Hex(), unionId, openId, appId, nil
 }
 
 func (s *AuthenticationService) SetPassword(ctx context.Context, req *sts.SetPasswordReq) (*sts.SetPasswordResp, error) {

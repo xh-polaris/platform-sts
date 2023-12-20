@@ -7,6 +7,7 @@ require (
 	github.com/cloudwego/kitex v0.6.1
 	github.com/google/wire v0.5.0
 	github.com/kitex-contrib/obs-opentelemetry v0.2.3
+	github.com/samber/lo v1.39.0
 	github.com/silenceper/wechat/v2 v2.1.6
 	github.com/tencentyun/cos-go-sdk-v5 v0.7.41
 	github.com/tencentyun/qcloud-cos-sts-sdk v0.0.0-20221108110633-dbdf102a1cdf
@@ -94,6 +95,7 @@ require (
 	go.opentelemetry.io/proto/otlp v0.19.0 // indirect
 	go.uber.org/automaxprocs v1.5.2 // indirect
 	golang.org/x/arch v0.2.0 // indirect
+	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
 	golang.org/x/net v0.12.0 // indirect
 	golang.org/x/sync v0.2.0 // indirect
 	golang.org/x/sys v0.10.0 // indirect
