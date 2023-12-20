@@ -16,6 +16,10 @@ type StsServerImpl struct {
 	AuthenticationService service.IAuthenticationService
 }
 
+func (s *StsServerImpl) SendMessage(ctx context.Context, req *sts.SendMessageReq) (res *sts.SendMessageResp, err error) {
+	return s.CosService.SendMessage(ctx, req)
+}
+
 func (s *StsServerImpl) GenCosSts(ctx context.Context, req *sts.GenCosStsReq) (res *sts.GenCosStsResp, err error) {
 	return s.CosService.GenCosSts(ctx, req)
 }

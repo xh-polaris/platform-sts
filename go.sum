@@ -426,8 +426,8 @@ github.com/xdg-go/stringprep v1.0.4 h1:XLI/Ng3O1Atzq0oBs3TWm+5ZVgkq2aqdlvP9JtoZ6
 github.com/xdg-go/stringprep v1.0.4/go.mod h1:mPGuuIYwz7CmR2bT9j4GbQqutWS1zV24gijq1dTyGkM=
 github.com/xh-polaris/gopkg v0.0.0-20230915071845-b0ecd425cb58 h1:Abqs8kG9hXr+SExatusfXgT42QX6dOB4StEmMppUtXg=
 github.com/xh-polaris/gopkg v0.0.0-20230915071845-b0ecd425cb58/go.mod h1:eFkuwj6uq1k4hbDa66TijCWGL4PrNeWaNmAnxfWDeU0=
-github.com/xh-polaris/service-idl-gen-go v0.0.0-20231115070446-eb5d5cb52b6b h1:NNpY78ZBmGqFoCmKPpflEQbFr7XFhb9DHtaNTkE7p9g=
-github.com/xh-polaris/service-idl-gen-go v0.0.0-20231115070446-eb5d5cb52b6b/go.mod h1:KjBt4ZOfugCsdAbFlrniKMDrpJAJobm8KEezTvKVnJM=
+github.com/xh-polaris/service-idl-gen-go v0.0.0-20231219152553-6c059a366f61 h1:td8vU800uXRICKhoGublvmsoW/g3q3f5xlRLj//0UKI=
+github.com/xh-polaris/service-idl-gen-go v0.0.0-20231219152553-6c059a366f61/go.mod h1:KjBt4ZOfugCsdAbFlrniKMDrpJAJobm8KEezTvKVnJM=
 github.com/xh-polaris/wechat/v2 v2.0.0-20231209071840-e8e62f402f89 h1:AZ9gi/LjYFnZEcw3MjFX94kNU1GsYpwnZ/Uw/v0iSFg=
 github.com/xh-polaris/wechat/v2 v2.0.0-20231209071840-e8e62f402f89/go.mod h1:7Iu3EhQYVtDUJAj+ZVRy8yom75ga7aDWv8RurLkVm0s=
 github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d h1:splanxYIlg+5LfHAM6xpdFEAYOk8iySO56hMFq6uLyA=

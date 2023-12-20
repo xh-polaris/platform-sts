@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/wire"
 	"github.com/silenceper/wechat/v2/miniprogram/security"
+	"github.com/silenceper/wechat/v2/miniprogram/subscribe"
 	cossdk "github.com/tencentyun/cos-go-sdk-v5"
 	cossts "github.com/tencentyun/qcloud-cos-sts-sdk/go"
 	"github.com/xh-polaris/service-idl-gen-go/kitex_gen/platform/sts"
@@ -29,12 +30,14 @@ type ICosService interface {
 	DeleteObject(ctx context.Context, req *sts.DeleteObjectReq) (*sts.DeleteObjectResp, error)
 	TextCheck(ctx context.Context, req *sts.TextCheckReq) (*sts.TextCheckResp, error)
 	PhotoCheck(ctx context.Context, req *sts.PhotoCheckReq) (*sts.PhotoCheckResp, error)
+	SendMessage(ctx context.Context, req *sts.SendMessageReq) (*sts.SendMessageResp, error)
 }
 
 type CosService struct {
 	Config         *config.Config
 	CosSDK         *cos.CosSDK
 	UrlMapper      mapper.UrlMapper
+	UserMapper     mapper.UserMapper
 	MiniProgramMap wechat.MiniProgramMap
 }
 
@@ -42,6 +45,55 @@ var CosSet = wire.NewSet(
 	wire.Struct(new(CosService), "*"),
 	wire.Bind(new(ICosService), new(*CosService)),
 )
+
+func (s *CosService) SendMessage(ctx context.Context, req *sts.SendMessageReq) (*sts.SendMessageResp, error) {
+	user := req.User.WechatUserMeta
+	if user.AppId == "" {
+		user.AppId = s.Config.DefaultWechatUser.AppId
+	}
+	mp := s.MiniProgramMap[user.AppId]
+	if mp == nil {
+		log.CtxError(ctx, "[SendMessage] appId not found")
+		return &sts.SendMessageResp{}, nil
+	}
+	toUser := ""
+	targetUser, err := s.UserMapper.FindOne(ctx, req.TargetUserId)
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range targetUser.Auth {
+		if v.Type == "wechat-openid" {
+			toUser = v.Value
+		}
+	}
+	if toUser == "" {
+		return nil, consts.ErrOpenIdNotFind
+	}
+	data := make(map[string]*subscribe.DataItem)
+	if req.MessageType == sts.MessageType_TypeFollowed {
+		data["name1"] = &subscribe.DataItem{Value: req.SourceUserName}
+		data["time2"] = &subscribe.DataItem{Value: time.Unix(req.CreateAt, 0)}
+		data["thing3"] = &subscribe.DataItem{Value: "有新的朋友关注您, 快来看看"}
+	} else if req.MessageType == sts.MessageType_TypeLiked {
+		data["thing1"] = &subscribe.DataItem{Value: req.SourceContent}
+		data["time2"] = &subscribe.DataItem{Value: time.Unix(req.CreateAt, 0)}
+		data["thing3"] = &subscribe.DataItem{Value: req.SourceUserName}
+	} else if req.MessageType == sts.MessageType_TypeComment {
+		data["thing15"] = &subscribe.DataItem{Value: req.SourceContent}
+		data["time3"] = &subscribe.DataItem{Value: time.Unix(req.CreateAt, 0)}
+		data["thing5"] = &subscribe.DataItem{Value: req.SourceUserName}
+		data["thing2"] = &subscribe.DataItem{Value: req.CommentText}
+	}
+	err = mp.Send(ctx, &subscribe.Message{
+		ToUser:     toUser,
+		TemplateID: s.Config.TemplateId[req.MessageType-1],
+		Data:       data,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &sts.SendMessageResp{}, nil
+}
 
 func (s *CosService) GenCosSts(ctx context.Context, req *sts.GenCosStsReq) (*sts.GenCosStsResp, error) {
 	cosConfig := s.Config.CosConfig

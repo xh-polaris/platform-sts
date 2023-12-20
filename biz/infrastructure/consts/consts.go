@@ -18,6 +18,7 @@ var (
 	ErrWrongWechatCode    = status.Error(10002, "wrong wechat code")
 	ErrInvalidArgument    = status.Error(10003, "invalid argument")
 	ErrWrongPassword      = status.Error(10004, "wrong password")
+	ErrOpenIdNotFind      = status.Error(10005, "openId not find")
 )
 
 const (

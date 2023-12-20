@@ -36,6 +36,7 @@ type Config struct {
 	Redis                    *redis.RedisConf
 	WeChatRedis              *redis.RedisConf
 	DefaultWechatUser        *DefaultWechatUser
+	TemplateId               []string
 	SMTP                     *struct {
 		Username string
 		Password string

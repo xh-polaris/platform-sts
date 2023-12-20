@@ -28,14 +28,15 @@ func NewStsServerImpl() (*adaptor.StsServerImpl, error) {
 		return nil, err
 	}
 	urlMapper := mapper.NewUrlMapper(configConfig)
+	userMapper := mapper.NewUserMapper(configConfig)
 	miniProgramMap := wechat.NewWechatApplicationMap(configConfig)
 	cosService := &service.CosService{
 		Config:         configConfig,
 		CosSDK:         cosSDK,
 		UrlMapper:      urlMapper,
+		UserMapper:     userMapper,
 		MiniProgramMap: miniProgramMap,
 	}
-	userMapper := mapper.NewUserMapper(configConfig)
 	redisRedis := redis.NewRedis(configConfig)
 	authenticationService := &service.AuthenticationService{
 		Config:         configConfig,

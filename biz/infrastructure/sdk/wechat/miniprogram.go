@@ -11,6 +11,7 @@ import (
 	"github.com/silenceper/wechat/v2/miniprogram/auth"
 	mpConfig "github.com/silenceper/wechat/v2/miniprogram/config"
 	"github.com/silenceper/wechat/v2/miniprogram/security"
+	"github.com/silenceper/wechat/v2/miniprogram/subscribe"
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/core/trace"
 	oteltrace "go.opentelemetry.io/otel/trace"
@@ -86,6 +87,14 @@ func (s *MiniProgramSDK) Code2Session(ctx context.Context, jsCode string) (resul
 		span.End(oteltrace.WithTimestamp(time.Now()))
 	}()
 	return s.sdk.GetAuth().Code2SessionContext(ctx, jsCode)
+}
+
+func (s *MiniProgramSDK) Send(ctx context.Context, in *subscribe.Message) (err error) {
+	ctx, span := trace.TracerFromContext(ctx).Start(ctx, "mp/subscribe/Send", oteltrace.WithTimestamp(time.Now()), oteltrace.WithSpanKind(oteltrace.SpanKindClient))
+	defer func() {
+		span.End(oteltrace.WithTimestamp(time.Now()))
+	}()
+	return s.sdk.GetSubscribe().Send(in)
 }
 
 type MiniProgramMap map[string]*MiniProgramSDK
