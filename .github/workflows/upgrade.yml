@@ -16,7 +16,7 @@ on:
 env:
   REGISTRY: docker.io
   USERNAME: xhpolaris
-  IMAGE_NAME: platform.sts
+  IMAGE_NAME: platform-sts
 
 jobs:
   build:
