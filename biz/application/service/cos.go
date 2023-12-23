@@ -70,17 +70,18 @@ func (s *CosService) SendMessage(ctx context.Context, req *sts.SendMessageReq) (
 		return nil, consts.ErrOpenIdNotFind
 	}
 	data := make(map[string]*subscribe.DataItem)
+	t := time.Unix(req.CreateAt, 0)
 	if req.MessageType == sts.MessageType_TypeFollowed {
 		data["name1"] = &subscribe.DataItem{Value: req.SourceUserName}
-		data["time2"] = &subscribe.DataItem{Value: time.Unix(req.CreateAt, 0)}
+		data["time2"] = &subscribe.DataItem{Value: fmt.Sprintf("%d年%d月%d日 %d:%02d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute())}
 		data["thing3"] = &subscribe.DataItem{Value: "有新的朋友关注您, 快来看看"}
 	} else if req.MessageType == sts.MessageType_TypeLiked {
 		data["thing1"] = &subscribe.DataItem{Value: req.SourceContent}
-		data["time2"] = &subscribe.DataItem{Value: time.Unix(req.CreateAt, 0)}
+		data["time2"] = &subscribe.DataItem{Value: fmt.Sprintf("%d年%d月%d日 %d:%02d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute())}
 		data["thing3"] = &subscribe.DataItem{Value: req.SourceUserName}
 	} else if req.MessageType == sts.MessageType_TypeComment {
 		data["thing15"] = &subscribe.DataItem{Value: req.SourceContent}
-		data["time3"] = &subscribe.DataItem{Value: time.Unix(req.CreateAt, 0)}
+		data["time3"] = &subscribe.DataItem{Value: fmt.Sprintf("%d年%d月%d日 %d:%02d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute())}
 		data["thing5"] = &subscribe.DataItem{Value: req.SourceUserName}
 		data["thing2"] = &subscribe.DataItem{Value: req.CommentText}
 	}
