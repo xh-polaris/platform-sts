@@ -289,7 +289,7 @@ func (s *AuthenticationService) SendVerifyCode(ctx context.Context, req *sts.Sen
 				"From: xh-polaris\r\n"+
 				"Content-Type: text/plain"+"; charset=UTF-8\r\n"+
 				"Subject: 验证码\r\n\r\n"+
-				"您正在进行喵社区账号注册，本次注册验证码为：%s，5分钟内有效，请勿透露给其他人。\r\n", req.AuthId, code.String())))
+				"您正在进行账号注册，本次注册验证码为：%s，5分钟内有效，请勿透露给其他人。\r\n", req.AuthId, code.String())))
 		if err != nil {
 			return nil, err
 		}
