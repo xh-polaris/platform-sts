@@ -1,4 +1,4 @@
-module github.com/xh-polaris/platform-sts
+ module github.com/xh-polaris/platform-sts
 
 go 1.18
 
@@ -9,6 +9,7 @@ require (
 	github.com/kitex-contrib/obs-opentelemetry v0.2.3
 	github.com/samber/lo v1.39.0
 	github.com/silenceper/wechat/v2 v2.1.6
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.1029
 	github.com/tencentyun/cos-go-sdk-v5 v0.7.41
 	github.com/tencentyun/qcloud-cos-sts-sdk v0.0.0-20221108110633-dbdf102a1cdf
 	github.com/xh-polaris/gopkg v0.0.0-20230915071845-b0ecd425cb58

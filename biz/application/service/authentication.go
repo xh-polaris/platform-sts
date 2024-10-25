@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
+	"log"
 	"math/big"
 	"net/smtp"
 	"strconv"
@@ -13,6 +14,9 @@ import (
 	"github.com/bytedance/sonic"
 	"github.com/google/wire"
 	"github.com/samber/lo"
+	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
+	tchttp "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/http"
+	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile"
 	"github.com/xh-polaris/service-idl-gen-go/kitex_gen/platform/sts"
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -294,6 +298,20 @@ func (s *AuthenticationService) SendVerifyCode(ctx context.Context, req *sts.Sen
 			return nil, err
 		}
 		verifyCode = code.String()
+	case consts.AuthTypePhone:
+		c := s.Config.SMS
+		code, err := rand.Int(rand.Reader, big.NewInt(900000))
+		code = code.Add(code, big.NewInt(100000))
+		if err != nil {
+			return nil, err
+		}
+		phones := make([]string, 0)
+		phones = append(phones, req.AuthId)
+		err = callSMS(c, phones, code.String())
+		if err != nil {
+			return nil, err
+		}
+
 	default:
 		return nil, errors.New("not implement")
 	}
@@ -302,4 +320,41 @@ func (s *AuthenticationService) SendVerifyCode(ctx context.Context, req *sts.Sen
 		return nil, err
 	}
 	return &sts.SendVerifyCodeResp{}, nil
+}
+
+func callSMS(sms *config.SMSConfig, phones []string, code string) error {
+	// 实例化一个认证对象，入参需要传入腾讯云账户 SecretId 和 SecretKey，此处还需注意密钥对的保密
+	// 密钥可前往官网控制台 https://console.cloud.tencent.com/cam/capi 进行获取
+	credential := common.NewCredential(sms.SecretId, sms.SecretKey)
+	cpf := profile.NewClientProfile()
+	cpf.HttpProfile.Endpoint = sms.Host
+	cpf.HttpProfile.ReqMethod = "POST"
+	client := common.NewCommonClient(credential, sms.Region, cpf).WithLogger(log.Default())
+
+	request := tchttp.NewCommonRequest("sms", sms.Version, sms.Action)
+	params := make(map[string]interface{})
+	params["PhoneNumberSet"] = phones
+	params["SmsSdkAppId"] = sms.SmsSdkAppId
+	params["TemplateId"] = sms.TemplateId
+	params["SignName"] = sms.SignName
+	// 模板参数
+	codes := make([]string, 0)
+	codes = append(codes, code)
+	codes = append(codes, "5")
+	params["TemplateParamSet"] = codes
+
+	err := request.SetActionParameters(params)
+	if err != nil {
+		return err
+	}
+
+	response := tchttp.NewCommonResponse()
+	err = client.Send(request, response)
+	if err != nil {
+		fmt.Println("fail to invoke api:", err.Error())
+		return err
+	}
+
+	fmt.Println(string(response.GetBody()))
+	return nil
 }
