@@ -311,6 +311,7 @@ func (s *AuthenticationService) SendVerifyCode(ctx context.Context, req *sts.Sen
 		if err != nil {
 			return nil, err
 		}
+		verifyCode = code.String()
 
 	default:
 		return nil, errors.New("not implement")
