@@ -28,6 +28,7 @@ import (
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/mapper"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/sdk/wechat"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/util"
+	logx "github.com/xh-polaris/platform-sts/biz/infrastructure/util/log"
 )
 
 type IAuthenticationService interface {
@@ -153,6 +154,7 @@ func (s *AuthenticationService) checkVerifyCode(ctx context.Context, except stri
 		}
 		return false, err
 	} else if verifyCode == "" {
+		logx.Info("查询到验证码为空")
 		return false, nil
 	} else if verifyCode != except {
 		return false, nil
@@ -320,6 +322,7 @@ func (s *AuthenticationService) SendVerifyCode(ctx context.Context, req *sts.Sen
 	if err != nil {
 		return nil, err
 	}
+	logx.Info("向%v:%v 发送验证码: %v", req.AuthType, req.AuthId, verifyCode)
 	return &sts.SendVerifyCodeResp{}, nil
 }
 

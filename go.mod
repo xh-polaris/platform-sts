@@ -1,4 +1,4 @@
- module github.com/xh-polaris/platform-sts
+module github.com/xh-polaris/platform-sts
 
 go 1.18
 
