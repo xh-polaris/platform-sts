@@ -9,6 +9,7 @@ import (
 	"math/big"
 	"net/smtp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/bytedance/sonic"
@@ -93,6 +94,8 @@ func (s *AuthenticationService) SignIn(ctx context.Context, req *sts.SignInReq) 
 		fallthrough
 	case consts.AuthTypeWechat:
 		resp.UserId, resp.UnionId, resp.OpenId, resp.AppId, err = s.signInByWechat(ctx, req)
+	case consts.AuthTypeWechatPhone:
+		resp.UserId, err = s.SignInByWechatPhone(ctx, req)
 	default:
 		return nil, consts.ErrInvalidArgument
 	}
@@ -160,6 +163,76 @@ func (s *AuthenticationService) checkVerifyCode(ctx context.Context, except stri
 		return false, nil
 	} else {
 		return true, nil
+	}
+}
+
+func (s *AuthenticationService) SignInByWechatPhone(ctx context.Context, req *sts.SignInReq) (string, error) {
+	code := req.GetVerifyCode() // 微信接口提供的换取手机号的code
+	var accessToken string
+	// 找到对应的小程序
+	for _, conf := range s.Config.WechatApplicationConfigs {
+		if req.AuthId == conf.AppID {
+			res, err := util.HTTPGet(ctx, fmt.Sprintf(consts.WXAccessTokenUrl, conf.AppID, conf.AppSecret))
+			if err != nil {
+				return "", err
+			}
+			var tokenRes map[string]any
+			if err = sonic.Unmarshal(res, &tokenRes); err != nil {
+				return "", err
+			}
+			if accessToken = tokenRes["access_token"].(string); accessToken == "" {
+				return "", consts.ErrGetToken
+			}
+			break
+		}
+	}
+
+	bodyString := fmt.Sprintf(`{"code":"%s"}`, code)
+	body := strings.NewReader(bodyString)
+	res, err := util.HTTPPost(ctx, fmt.Sprintf(consts.WXUserPhoneUrl, accessToken), body)
+	if err != nil {
+		return "", err
+	}
+
+	var phoneRes map[string]any
+	if err = sonic.Unmarshal(res, &phoneRes); err != nil {
+		return "", err
+	} else if phoneRes["errcode"].(float64) != 0 {
+		return "", errors.New(phoneRes["errmsg"].(string))
+	}
+	phoneInfo, ok := phoneRes["phone_info"].(map[string]any)
+	if !ok {
+		return "", errors.New("phone_info 类型断言失败")
+	}
+	// 获取到的手机号，国外的会有区号
+	phone := phoneInfo["phoneNumber"].(string)
+
+	// 这里类型用"phone", 因为本质上还是有手机登录，只不过换了一种验证方式
+	UserMapper := s.UserMapper
+	auth := &db.Auth{
+		Type:  consts.AuthTypePhone,
+		Value: phone,
+	}
+
+	user, err := UserMapper.FindOneByAuth(ctx, auth)
+	switch {
+	case err == nil:
+		// 找到了则直接返回id即可
+		return user.ID.Hex(), nil
+	case errors.Is(err, consts.ErrNotFound):
+		// 没找到需要创建
+		auths := []*db.Auth{{
+			Type:  consts.AuthTypePhone,
+			Value: phone,
+		}}
+		user = &db.User{Auth: auths}
+		err = UserMapper.Insert(ctx, user)
+		if err != nil {
+			return "", err
+		}
+		return user.ID.Hex(), nil
+	default:
+		return "", err
 	}
 }
 
@@ -231,7 +304,6 @@ func (s *AuthenticationService) signInByWechat(ctx context.Context, req *sts.Sig
 			return *item == *openAuth
 		})
 		if !ok {
-
 			user.Auth = append(user.Auth, openAuth)
 			err := UserMapper.Update(ctx, user)
 			if err != nil {
