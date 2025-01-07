@@ -173,6 +173,7 @@ func (s *AuthenticationService) SignInByWechatPhone(ctx context.Context, req *st
 	for _, conf := range s.Config.WechatApplicationConfigs {
 		if req.AuthId == conf.AppID {
 			res, err := util.HTTPGet(ctx, fmt.Sprintf(consts.WXAccessTokenUrl, conf.AppID, conf.AppSecret))
+			logx.Info("微信AccessToken接口响应" + string(res))
 			if err != nil {
 				return "", err
 			}
