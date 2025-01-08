@@ -38,3 +38,28 @@ func HTTPGet(ctx context.Context, rawURL string) ([]byte, error) {
 	}
 	return io.ReadAll(response.Body)
 }
+
+func HTTPPost(ctx context.Context, rawURL string, body io.Reader) ([]byte, error) {
+	parsedURL, err := url.Parse(rawURL)
+	if err != nil {
+		return nil, err
+	}
+	baseURL := parsedURL.Scheme + "://" + parsedURL.Host + parsedURL.Path
+	ctx, span := trace.TracerFromContext(ctx).Start(ctx, fmt.Sprintf("http/%s", baseURL), oteltrace.WithTimestamp(time.Now()), oteltrace.WithSpanKind(oteltrace.SpanKindClient))
+	defer func() {
+		span.End(oteltrace.WithTimestamp(time.Now()))
+	}()
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, rawURL, body)
+	if err != nil {
+		return nil, err
+	}
+	response, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("http post error : rawURL=%v , statusCode=%v", rawURL, response.StatusCode)
+	}
+	return io.ReadAll(response.Body)
+}

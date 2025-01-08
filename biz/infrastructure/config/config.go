@@ -52,6 +52,19 @@ type Config struct {
 		Retry     int
 		GroupName string
 	}
+	SMS *SMSConfig
+}
+
+type SMSConfig struct {
+	SecretId    string
+	SecretKey   string
+	Host        string
+	Action      string
+	Version     string
+	Region      string
+	SmsSdkAppId string
+	TemplateId  string
+	SignName    string // 短信签名内容，使用 UTF-8 编码，必须填写已审核通过的签名，例如：腾讯云，签名信息可前往 国内短信 或 国际/港澳台短信 的签名管理查看。 注意 发送国内短信该参数必填，且需填写签名内容而非签名ID。
 }
 
 type DefaultWechatUser struct {

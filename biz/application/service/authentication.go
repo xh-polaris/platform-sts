@@ -5,14 +5,19 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
+	"log"
 	"math/big"
 	"net/smtp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/bytedance/sonic"
 	"github.com/google/wire"
 	"github.com/samber/lo"
+	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
+	tchttp "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/http"
+	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile"
 	"github.com/xh-polaris/service-idl-gen-go/kitex_gen/platform/sts"
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -24,6 +29,7 @@ import (
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/mapper"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/sdk/wechat"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/util"
+	logx "github.com/xh-polaris/platform-sts/biz/infrastructure/util/log"
 )
 
 type IAuthenticationService interface {
@@ -88,6 +94,8 @@ func (s *AuthenticationService) SignIn(ctx context.Context, req *sts.SignInReq) 
 		fallthrough
 	case consts.AuthTypeWechat:
 		resp.UserId, resp.UnionId, resp.OpenId, resp.AppId, err = s.signInByWechat(ctx, req)
+	case consts.AuthTypeWechatPhone:
+		resp.UserId, resp.Options, resp.AppId, err = s.SignInByWechatPhone(ctx, req) // 通过code获得的phone存在openId字段
 	default:
 		return nil, consts.ErrInvalidArgument
 	}
@@ -149,11 +157,85 @@ func (s *AuthenticationService) checkVerifyCode(ctx context.Context, except stri
 		}
 		return false, err
 	} else if verifyCode == "" {
+		logx.Info("查询到验证码为空")
 		return false, nil
 	} else if verifyCode != except {
 		return false, nil
 	} else {
 		return true, nil
+	}
+}
+
+func (s *AuthenticationService) SignInByWechatPhone(ctx context.Context, req *sts.SignInReq) (string, *string, string, error) {
+	var appId string
+	code := req.GetVerifyCode() // 微信接口提供的换取手机号的code
+	var accessToken string
+	// 找到对应的小程序
+	for _, conf := range s.Config.WechatApplicationConfigs {
+		if req.AuthId == conf.AppID {
+			appId = conf.AppID
+			res, err := util.HTTPGet(ctx, fmt.Sprintf(consts.WXAccessTokenUrl, conf.AppID, conf.AppSecret))
+			logx.Info("微信AccessToken接口响应" + string(res))
+			if err != nil {
+				return "", nil, appId, err
+			}
+			tokenRes := make(map[string]any)
+			if err = sonic.Unmarshal(res, &tokenRes); err != nil {
+				return "", nil, appId, err
+			}
+			if accessToken = tokenRes["access_token"].(string); accessToken == "" {
+				return "", nil, appId, consts.ErrGetToken
+			}
+			break
+		}
+	}
+
+	bodyString := fmt.Sprintf(`{"code":"%s"}`, code)
+	body := strings.NewReader(bodyString)
+	res, err := util.HTTPPost(ctx, fmt.Sprintf(consts.WXUserPhoneUrl, accessToken), body)
+	if err != nil {
+		return "", nil, appId, err
+	}
+
+	var phoneRes map[string]any
+	if err = sonic.Unmarshal(res, &phoneRes); err != nil {
+		return "", nil, appId, err
+	} else if phoneRes["errcode"].(float64) != 0 {
+		return "", nil, appId, errors.New(phoneRes["errmsg"].(string))
+	}
+	phoneInfo, ok := phoneRes["phone_info"].(map[string]any)
+	if !ok {
+		return "", nil, appId, errors.New("phone_info 类型断言失败")
+	}
+	// 获取到的手机号，国外的会有区号
+	phone := phoneInfo["phoneNumber"].(string)
+
+	// 这里类型用"phone", 因为本质上还是有手机登录，只不过换了一种验证方式
+	UserMapper := s.UserMapper
+	auth := &db.Auth{
+		Type:  consts.AuthTypePhone,
+		Value: phone,
+	}
+
+	user, err := UserMapper.FindOneByAuth(ctx, auth)
+	switch {
+	case err == nil:
+		// 找到了则直接返回id即可
+		return user.ID.Hex(), &phone, appId, nil
+	case errors.Is(err, consts.ErrNotFound):
+		// 没找到需要创建
+		auths := []*db.Auth{{
+			Type:  consts.AuthTypePhone,
+			Value: phone,
+		}}
+		user = &db.User{Auth: auths}
+		err = UserMapper.Insert(ctx, user)
+		if err != nil {
+			return "", &phone, appId, err
+		}
+		return user.ID.Hex(), &phone, appId, nil
+	default:
+		return "", &phone, appId, err
 	}
 }
 
@@ -225,7 +307,6 @@ func (s *AuthenticationService) signInByWechat(ctx context.Context, req *sts.Sig
 			return *item == *openAuth
 		})
 		if !ok {
-
 			user.Auth = append(user.Auth, openAuth)
 			err := UserMapper.Update(ctx, user)
 			if err != nil {
@@ -294,6 +375,21 @@ func (s *AuthenticationService) SendVerifyCode(ctx context.Context, req *sts.Sen
 			return nil, err
 		}
 		verifyCode = code.String()
+	case consts.AuthTypePhone:
+		c := s.Config.SMS
+		code, err := rand.Int(rand.Reader, big.NewInt(900000))
+		code = code.Add(code, big.NewInt(100000))
+		if err != nil {
+			return nil, err
+		}
+		phones := make([]string, 0)
+		phones = append(phones, req.AuthId)
+		err = callSMS(c, phones, code.String())
+		if err != nil {
+			return nil, err
+		}
+		verifyCode = code.String()
+
 	default:
 		return nil, errors.New("not implement")
 	}
@@ -301,5 +397,43 @@ func (s *AuthenticationService) SendVerifyCode(ctx context.Context, req *sts.Sen
 	if err != nil {
 		return nil, err
 	}
+	logx.Info("向%v:%v 发送验证码: %v", req.AuthType, req.AuthId, verifyCode)
 	return &sts.SendVerifyCodeResp{}, nil
+}
+
+func callSMS(sms *config.SMSConfig, phones []string, code string) error {
+	// 实例化一个认证对象，入参需要传入腾讯云账户 SecretId 和 SecretKey，此处还需注意密钥对的保密
+	// 密钥可前往官网控制台 https://console.cloud.tencent.com/cam/capi 进行获取
+	credential := common.NewCredential(sms.SecretId, sms.SecretKey)
+	cpf := profile.NewClientProfile()
+	cpf.HttpProfile.Endpoint = sms.Host
+	cpf.HttpProfile.ReqMethod = "POST"
+	client := common.NewCommonClient(credential, sms.Region, cpf).WithLogger(log.Default())
+
+	request := tchttp.NewCommonRequest("sms", sms.Version, sms.Action)
+	params := make(map[string]interface{})
+	params["PhoneNumberSet"] = phones
+	params["SmsSdkAppId"] = sms.SmsSdkAppId
+	params["TemplateId"] = sms.TemplateId
+	params["SignName"] = sms.SignName
+	// 模板参数
+	codes := make([]string, 0)
+	codes = append(codes, code)
+	codes = append(codes, "5")
+	params["TemplateParamSet"] = codes
+
+	err := request.SetActionParameters(params)
+	if err != nil {
+		return err
+	}
+
+	response := tchttp.NewCommonResponse()
+	err = client.Send(request, response)
+	if err != nil {
+		fmt.Println("fail to invoke api:", err.Error())
+		return err
+	}
+
+	fmt.Println(string(response.GetBody()))
+	return nil
 }
