@@ -177,7 +177,7 @@ func (s *AuthenticationService) SignInByWechatPhone(ctx context.Context, req *st
 			if err != nil {
 				return "", err
 			}
-			var tokenRes map[string]any
+			tokenRes := make(map[string]any)
 			if err = sonic.Unmarshal(res, &tokenRes); err != nil {
 				return "", err
 			}

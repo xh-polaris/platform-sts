@@ -49,7 +49,7 @@ func HTTPPost(ctx context.Context, rawURL string, body io.Reader) ([]byte, error
 	defer func() {
 		span.End(oteltrace.WithTimestamp(time.Now()))
 	}()
-	request, err := http.NewRequestWithContext(ctx, http.MethodPost, baseURL, body)
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, rawURL, body)
 	if err != nil {
 		return nil, err
 	}
