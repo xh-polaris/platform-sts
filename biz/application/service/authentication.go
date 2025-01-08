@@ -95,7 +95,7 @@ func (s *AuthenticationService) SignIn(ctx context.Context, req *sts.SignInReq) 
 	case consts.AuthTypeWechat:
 		resp.UserId, resp.UnionId, resp.OpenId, resp.AppId, err = s.signInByWechat(ctx, req)
 	case consts.AuthTypeWechatPhone:
-		resp.UserId, err = s.SignInByWechatPhone(ctx, req)
+		resp.UserId, resp.Options, resp.AppId, err = s.SignInByWechatPhone(ctx, req) // 通过code获得的phone存在openId字段
 	default:
 		return nil, consts.ErrInvalidArgument
 	}
@@ -166,23 +166,25 @@ func (s *AuthenticationService) checkVerifyCode(ctx context.Context, except stri
 	}
 }
 
-func (s *AuthenticationService) SignInByWechatPhone(ctx context.Context, req *sts.SignInReq) (string, error) {
+func (s *AuthenticationService) SignInByWechatPhone(ctx context.Context, req *sts.SignInReq) (string, *string, string, error) {
+	var appId string
 	code := req.GetVerifyCode() // 微信接口提供的换取手机号的code
 	var accessToken string
 	// 找到对应的小程序
 	for _, conf := range s.Config.WechatApplicationConfigs {
 		if req.AuthId == conf.AppID {
+			appId = conf.AppID
 			res, err := util.HTTPGet(ctx, fmt.Sprintf(consts.WXAccessTokenUrl, conf.AppID, conf.AppSecret))
 			logx.Info("微信AccessToken接口响应" + string(res))
 			if err != nil {
-				return "", err
+				return "", nil, appId, err
 			}
 			tokenRes := make(map[string]any)
 			if err = sonic.Unmarshal(res, &tokenRes); err != nil {
-				return "", err
+				return "", nil, appId, err
 			}
 			if accessToken = tokenRes["access_token"].(string); accessToken == "" {
-				return "", consts.ErrGetToken
+				return "", nil, appId, consts.ErrGetToken
 			}
 			break
 		}
@@ -192,18 +194,18 @@ func (s *AuthenticationService) SignInByWechatPhone(ctx context.Context, req *st
 	body := strings.NewReader(bodyString)
 	res, err := util.HTTPPost(ctx, fmt.Sprintf(consts.WXUserPhoneUrl, accessToken), body)
 	if err != nil {
-		return "", err
+		return "", nil, appId, err
 	}
 
 	var phoneRes map[string]any
 	if err = sonic.Unmarshal(res, &phoneRes); err != nil {
-		return "", err
+		return "", nil, appId, err
 	} else if phoneRes["errcode"].(float64) != 0 {
-		return "", errors.New(phoneRes["errmsg"].(string))
+		return "", nil, appId, errors.New(phoneRes["errmsg"].(string))
 	}
 	phoneInfo, ok := phoneRes["phone_info"].(map[string]any)
 	if !ok {
-		return "", errors.New("phone_info 类型断言失败")
+		return "", nil, appId, errors.New("phone_info 类型断言失败")
 	}
 	// 获取到的手机号，国外的会有区号
 	phone := phoneInfo["phoneNumber"].(string)
@@ -219,7 +221,7 @@ func (s *AuthenticationService) SignInByWechatPhone(ctx context.Context, req *st
 	switch {
 	case err == nil:
 		// 找到了则直接返回id即可
-		return user.ID.Hex(), nil
+		return user.ID.Hex(), &phone, appId, nil
 	case errors.Is(err, consts.ErrNotFound):
 		// 没找到需要创建
 		auths := []*db.Auth{{
@@ -229,11 +231,11 @@ func (s *AuthenticationService) SignInByWechatPhone(ctx context.Context, req *st
 		user = &db.User{Auth: auths}
 		err = UserMapper.Insert(ctx, user)
 		if err != nil {
-			return "", err
+			return "", &phone, appId, err
 		}
-		return user.ID.Hex(), nil
+		return user.ID.Hex(), &phone, appId, nil
 	default:
-		return "", err
+		return "", &phone, appId, err
 	}
 }
 
